@@ -1,8 +1,30 @@
 Patch Notes
 
-v1.3.0 - Security & Data Optimization
+v1.4.0 - Performance Optimization & Cleanup
 
 Status: Ready for Deployment
+
+⚡ Performance (Caching Strategy)
+
+Server-Side Caching: Implemented a robust caching layer in server.mjs using ioredis.
+
+Persistence: Uses Redis (via Upstash) to store API responses persistently, ensuring the cache survives server restarts and deployments.
+
+Fallback: Automatically falls back to a local .cache/ file system for local development if REDIS_URL is not present.
+
+Logic: Caches serviceMetrics requests only for past dates to ensure data integrity, preventing incomplete "today" data from being stored permanently. serviceDetails are cached by RID.
+
+Impact: Significantly reduces API calls to the National Rail HSP service, saving quota and improving response times for repeat queries.
+
+🧹 Codebase Cleanup
+
+Removed Background Worker: Deleted delay_checker.mjs and the node-notifier dependency to focus the repository purely on the web application architecture.
+
+Simplified Dependencies: Removed unused packages from package.json to keep the build lightweight.
+
+v1.3.0 - Security & Data Optimization
+
+Status: Implemented
 
 🔒 Security & Infrastructure
 
@@ -24,17 +46,11 @@ Benefit: Decouples data from logic, making it easier to update station lists wit
 
 Efficiency: The frontend now loads and processes the full UK station dataset at runtime, mapping only the necessary fields (name, code) for the autocomplete system.
 
-v1.2.0 - Full Stack & Background Services
+v1.2.0 - Full Stack Architecture
 
 Status: Implemented
 
-🚀 New Features (Backend & Automation)
-
-Background Delay Checker: Added delay_checker.mjs, a standalone Node.js script.
-
-Runs headlessly to check delays for specific commuter routes.
-
-Triggers Native Desktop Notifications (via node-notifier) if delays exceed 15 minutes or if trains are cancelled.
+🚀 Architecture
 
 Express.js Proxy Server: Added server.mjs.
 
