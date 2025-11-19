@@ -1,16 +1,14 @@
 import express from 'express';
 import cors from 'cors';
-import https from 'https';
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
+import { Queue, Worker } from 'bullmq'; // Import BullMQ
 import Redis from 'ioredis';
 
-// ... (Keep existing Configuration & Redis setup unchanged) ...
-// ... (Same imports and setup as before) ...
-
+// --- Configuration ---
 const CONSUMER_KEY = process.env.RAIL_API_KEY;
 const REDIS_URL = process.env.REDIS_URL; 
 
@@ -24,140 +22,135 @@ const DETAILS_URL = "https://api1.raildata.org.uk/1010-historical-service-perfor
 const PORT = process.env.PORT || 3000;
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
+// --- Redis Connection ---
+// We need a connection object for BullMQ
+let connection;
+if (REDIS_URL) {
+    console.log("🔌 Connecting to Redis...");
+    connection = new Redis(REDIS_URL, { maxRetriesPerRequest: null });
+} else {
+    console.warn("⚠️ No REDIS_URL. Queueing will not work correctly without Redis.");
+    // In a real app, we'd exit or fallback to an in-memory mock, 
+    // but for this example, we assume Redis is available as per v1.4.0 setup.
+    connection = new Redis({ maxRetriesPerRequest: null }); 
+}
+
+// --- Queue Setup ---
+const searchQueue = new Queue('rail-search-queue', { connection });
+
+// --- Worker Setup (The Background Processor) ---
+// This processes jobs ONE by ONE to respect rate limits
+const worker = new Worker('rail-search-queue', async (job) => {
+    const { type, payload } = job.data;
+    console.log(`⚙️ Processing job ${job.id}: ${type}`);
+
+    // Artificial delay to enforce global rate limit across all users
+    await new Promise(r => setTimeout(r, 1500)); 
+
+    let url;
+    if (type === 'metrics') url = METRICS_URL;
+    else if (type === 'details') url = DETAILS_URL;
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-apikey': CONSUMER_KEY },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            // If rate limited, throw error so BullMQ retries later automatically
+            if (response.status === 429) {
+                throw new Error('Rate Limited');
+            }
+            const text = await response.text();
+            throw new Error(`API Error ${response.status}: ${text}`);
+        }
+
+        const data = await response.json();
+        return data; // This result is stored in Redis by BullMQ
+
+    } catch (error) {
+        console.error(`Job ${job.id} failed: ${error.message}`);
+        throw error;
+    }
+}, { 
+    connection,
+    limiter: {
+        max: 1,      // Max 1 job
+        duration: 1500 // Per 1500ms (Strict Rate Limiting)
+    }
+});
+
+// --- Express App ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const app = express();
 
-let redisClient = null;
-if (REDIS_URL) {
-    console.log("🔌 Connecting to Redis for caching...");
-    redisClient = new Redis(REDIS_URL);
-    redisClient.on('error', (err) => console.error('Redis Error:', err));
-} else {
-    console.log("⚠️ No REDIS_URL found. Falling back to local file cache (.cache/)");
-    const CACHE_DIR = path.join(__dirname, '.cache');
-    if (!fs.existsSync(CACHE_DIR)) fs.mkdirSync(CACHE_DIR);
-}
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-async function getFromCache(key) {
-    if (redisClient) {
-        const data = await redisClient.get(key);
-        return data ? JSON.parse(data) : null;
-    } else {
-        const filePath = path.join(__dirname, '.cache', key + '.json');
-        if (fs.existsSync(filePath)) {
-            return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-        }
-        return null;
-    }
-}
-
-async function saveToCache(key, data, ttlSeconds = 0) {
-    const stringData = JSON.stringify(data);
-    if (redisClient) {
-        if (ttlSeconds > 0) {
-            await redisClient.set(key, stringData, 'EX', ttlSeconds);
-        } else {
-            await redisClient.set(key, stringData);
-        }
-    } else {
-        const filePath = path.join(__dirname, '.cache', key + '.json');
-        fs.writeFileSync(filePath, stringData);
-    }
-}
-
+// --- Helper: Cache Key ---
 function getCacheKey(endpoint, payload) {
     const dataString = endpoint + JSON.stringify(payload);
     return crypto.createHash('md5').update(dataString).digest('hex');
 }
 
-function isDateInPast(dateStr) {
-    if (!dateStr) return false;
-    const today = new Date().toISOString().split('T')[0];
-    return dateStr < today;
-}
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
-
 // --- API Endpoints ---
 
+// 1. Enqueue Metrics Search
 app.post('/api/servicemetrics', async (req, res) => {
     const payload = req.body;
     if (!payload.to_date && payload.from_date) payload.to_date = payload.from_date;
 
-    const cacheKey = getCacheKey('metrics', payload);
+    // Check if we already have a cached result in Redis directly (Optimization)
+    // Note: BullMQ stores job results, but we can also use our manual cache logic from v1.4
+    // For simplicity in v1.5, we rely on BullMQ's job storage.
     
-    // 1. Try Cache
-    const cachedData = await getFromCache(cacheKey);
-    if (cachedData) {
-        console.log(`⚡ Served from Cache: Metrics for ${payload.from_date}`);
-        // Inject metadata tag for frontend
-        // We clone it to avoid mutating the cached object if it's in memory (though JSON.parse usually handles that)
-        const responseWithTag = { ...cachedData, _fromCache: true };
-        return res.json(responseWithTag);
-    }
-
-    // 2. Fetch API
     try {
-        const apiResponse = await fetch(METRICS_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-apikey': CONSUMER_KEY },
-            body: JSON.stringify(payload)
-        });
-
-        if (!apiResponse.ok) {
-             const errorText = await apiResponse.text();
-             try { return res.status(apiResponse.status).json(JSON.parse(errorText)); } 
-             catch (e) { return res.status(apiResponse.status).json({ error: errorText }); }
-        }
-
-        const data = await apiResponse.json();
-        // Send fresh data (implicitly _fromCache: undefined/false)
-        res.json(data);
-
-        // 3. Save Cache
-        if (isDateInPast(payload.from_date)) {
-            await saveToCache(cacheKey, data);
-        }
-
+        const job = await searchQueue.add('metrics', { type: 'metrics', payload });
+        res.json({ jobId: job.id, status: 'queued' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 
+// 2. Enqueue Details Search
 app.post('/api/servicedetails', async (req, res) => {
     const payload = req.body;
-    const cacheKey = getCacheKey('details', payload);
-
-    const cachedData = await getFromCache(cacheKey);
-    if (cachedData) {
-        // Inject metadata tag
-        const responseWithTag = { ...cachedData, _fromCache: true };
-        return res.json(responseWithTag);
-    }
-
     try {
-        const apiResponse = await fetch(DETAILS_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-apikey': CONSUMER_KEY },
-            body: JSON.stringify(payload)
-        });
+        const job = await searchQueue.add('details', { type: 'details', payload });
+        res.json({ jobId: job.id, status: 'queued' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
-        if (!apiResponse.ok) {
-            const errorText = await apiResponse.text();
-             try { return res.status(apiResponse.status).json(JSON.parse(errorText)); } 
-             catch (e) { return res.status(apiResponse.status).json({ error: errorText }); }
+// 3. Job Status Endpoint (Polling)
+app.get('/api/job/:id', async (req, res) => {
+    const jobId = req.params.id;
+    try {
+        const job = await searchQueue.getJob(jobId);
+        
+        if (!job) {
+            return res.status(404).json({ error: 'Job not found' });
         }
 
-        const data = await apiResponse.json();
-        res.json(data); 
-
-        await saveToCache(cacheKey, data);
-
+        const state = await job.getState(); // 'completed', 'failed', 'delayed', 'active', 'waiting'
+        
+        if (state === 'completed') {
+            // Return the actual data
+            const result = job.returnvalue;
+            res.json({ status: 'completed', data: result });
+        } else if (state === 'failed') {
+            res.json({ status: 'failed', error: job.failedReason });
+        } else {
+            // Still working
+            res.json({ status: 'pending', state });
+        }
     } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error', details: error.message });
+        res.status(500).json({ error: error.message });
     }
 });
 
@@ -165,9 +158,10 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'DelayRepayChecker.html'));
 });
 
+// --- Start Server ---
 if (IS_PRODUCTION) {
     http.createServer(app).listen(PORT, () => {
-        console.log(`🚀 Production server running on port ${PORT} (HTTP)`);
+        console.log(`🚀 Production server (Queue Enabled) running on port ${PORT}`);
     });
 } else {
     try {
@@ -176,10 +170,10 @@ if (IS_PRODUCTION) {
             cert: fs.readFileSync('cert.pem')
         };
         https.createServer(httpsOptions, app).listen(PORT, () => {
-            console.log(`🔒 Local development server running on https://localhost:${PORT}`);
+            console.log(`🔒 Local server (Queue Enabled) running on https://localhost:${PORT}`);
         });
     } catch (e) {
-        console.warn("⚠️  SSL keys not found. Falling back to HTTP for local dev.");
+        console.warn("⚠️  SSL keys not found. Falling back to HTTP.");
         http.createServer(app).listen(PORT, () => {
             console.log(`⚠️  Local server running on http://localhost:${PORT}`);
         });
