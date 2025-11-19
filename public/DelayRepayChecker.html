@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#059669"> <!-- Emerald-600 matches nav -->
+    <meta name="theme-color" content="#10b981"> <!-- Updated to match manifest theme_color -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <title>Rail Delay Finder</title>
+    
+    <!-- Linked Resources -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="train_icon.png">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,13 +27,10 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc;
-            /* Prevent bounce scroll on mobile body to keep app-like feel */
             overscroll-behavior-y: none; 
         }
 
         /* --- Mobile Optimizations --- */
-        
-        /* Custom Scrollbar for Settings Panel */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
@@ -54,7 +55,6 @@
                 border: none;
                 font-size: 0.95rem;
             }
-            /* Add labels using data-label attribute */
             .mobile-table-card td::before {
                 content: attr(data-label);
                 font-weight: 600;
@@ -70,7 +70,7 @@
             }
         }
 
-        /* Radial Progress Loader */
+        /* Progress Loader */
         .progress-ring {
             transition: stroke-dashoffset 0.35s linear;
             transform: rotate(-90deg);
@@ -86,9 +86,9 @@
             -webkit-appearance: none; appearance: none;
             background-color: #fff;
             border: 1px solid #d1d5db;
-            border-radius: 0.5rem; /* Larger radius */
-            padding: 0.6rem 0.875rem; /* Larger touch area */
-            font-size: 1rem; /* Prevents iOS zoom on focus */
+            border-radius: 0.5rem;
+            padding: 0.6rem 0.875rem;
+            font-size: 1rem;
             box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
         }
         input:focus {
@@ -103,23 +103,14 @@
         }
         
         /* Toggle Switch */
-        .toggle-checkbox:checked {
-            right: 0;
-            border-color: #10b981;
-        }
-        .toggle-checkbox:checked + .toggle-label {
-            background-color: #10b981;
-        }
+        .toggle-checkbox:checked { right: 0; border-color: #10b981; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
         
         /* KPI Widgets */
-        .kpi-card {
-            transition: transform 0.2s;
-        }
-        .kpi-card:active {
-            transform: scale(0.98);
-        }
+        .kpi-card { transition: transform 0.2s; }
+        .kpi-card:active { transform: scale(0.98); }
 
-        /* Horizontal Scroll Snap for KPIs on Mobile */
+        /* Horizontal Scroll Snap for KPIs */
         .kpi-scroller {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -132,11 +123,11 @@
                 padding-bottom: 1rem;
                 scroll-snap-type: x mandatory;
                 -webkit-overflow-scrolling: touch;
-                margin-right: -1rem; /* Bleed to edge */
+                margin-right: -1rem;
                 padding-right: 1rem;
             }
             .kpi-scroller > * {
-                flex: 0 0 140px; /* Fixed width cards */
+                flex: 0 0 140px;
                 scroll-snap-align: start;
             }
         }
@@ -157,8 +148,8 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <div class="flex-shrink-0 flex items-center">
-                        <span class="text-3xl transform -translate-y-0.5" role="img" aria-label="Train">🚆</span>
-                        <span class="ml-3 text-xl font-bold text-white tracking-tight">DelayRepay</span>
+                        <img src="train_icon.png" alt="Train Logo" class="h-8 w-8 mr-3">
+                        <span class="text-xl font-bold text-white tracking-tight">DelayRepay</span>
                     </div>
                 </div>
                 <div class="flex items-center">
@@ -171,7 +162,7 @@
         </div>
     </nav>
 
-    <!-- Settings Panel (Full width on mobile, drawer on desktop) -->
+    <!-- Settings Panel -->
     <div id="settings-overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
     <div id="settings-panel" class="fixed inset-y-0 right-0 w-full sm:w-96 bg-white shadow-2xl z-50 transform translate-x-full flex flex-col custom-scrollbar">
         
@@ -240,12 +231,6 @@
                      </div>
                  </div>
              </div>
-             
-             <!-- API Demo Toggle -->
-             <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                 <h3 class="text-sm font-bold text-amber-800 mb-1">Demo Mode</h3>
-                 <p class="text-xs text-amber-700 mb-2">Running without backend API. Generates sample data.</p>
-             </div>
         </div>
         
         <div class="flex-none p-5 border-t border-gray-200 bg-gray-50 safe-area-bottom">
@@ -261,7 +246,7 @@
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="p-5 sm:p-6 bg-gradient-to-r from-emerald-50 to-white border-b border-emerald-100">
                 <h1 class="text-xl font-bold text-gray-900">Find Delays</h1>
-                <p class="text-gray-500 text-sm mt-1">Analyze your commute for compensation.</p>
+                <p class="text-gray-500 text-sm mt-1">Analyse your commute for compensation.</p>
             </div>
 
             <form id="search-form" class="p-5 sm:p-6 space-y-6">
@@ -467,47 +452,13 @@
 
     </main>
 
-
-    <!-- --- Javascript Logic --- -->
+    <!-- Load Config first -->
+    <script src="config.js"></script>
+    <!-- Load Station Data second -->
+    <script src="station_data.js"></script>
+    
     <script>
-        /* --- 1. Config & Data Stubs (Mobile Optimized) --- */
-        
-        // NOTE: In a real deployment, these would be your actual endpoints.
-        // For this demo, we mock the fetch calls if they fail or if in demo mode.
-        const API_BASE = 'https://api.example.com'; // Placeholder
-        const METRICS_URL = `${API_BASE}/metrics`;
-        const DETAILS_URL = `${API_BASE}/details`;
-        const JOURNEYS_PER_YEAR = 464; // Standard commute divisor
-
-        // Embedded Station Data (Top 50 UK Stations for Autocomplete)
-        const stationData = [
-            {name: "London Paddington", code: "PAD"}, {name: "Didcot Parkway", code: "DID"}, 
-            {name: "Reading", code: "RDG"}, {name: "Oxford", code: "OXF"}, 
-            {name: "Bristol Temple Meads", code: "BRI"}, {name: "Bath Spa", code: "BTH"},
-            {name: "Swindon", code: "SWI"}, {name: "Chippenham", code: "CPM"},
-            {name: "London Euston", code: "EUS"}, {name: "Birmingham New Street", code: "BHM"},
-            {name: "Manchester Piccadilly", code: "MAN"}, {name: "Liverpool Lime Street", code: "LIV"},
-            {name: "Leeds", code: "LDS"}, {name: "York", code: "YRK"},
-            {name: "Edinburgh", code: "EDB"}, {name: "Glasgow Central", code: "GLC"},
-            {name: "Cardiff Central", code: "CDF"}, {name: "Swansea", code: "SWA"},
-            {name: "Southampton Central", code: "SOU"}, {name: "Bournemouth", code: "BMH"},
-            {name: "Brighton", code: "BTN"}, {name: "London Victoria", code: "VIC"},
-            {name: "London Waterloo", code: "WAT"}, {name: "London Bridge", code: "LBG"},
-            {name: "London King's Cross", code: "KGX"}, {name: "London St Pancras", code: "STP"},
-            {name: "Slough", code: "SLO"}, {name: "Maidenhead", code: "MAI"},
-            {name: "Twyford", code: "TWY"}, {name: "Newbury", code: "NBY"},
-            {name: "Exeter St Davids", code: "EXD"}, {name: "Plymouth", code: "PLY"},
-            {name: "Penzance", code: "PNZ"}, {name: "Nottingham", code: "NOT"},
-            {name: "Sheffield", code: "SHF"}, {name: "Newcastle", code: "NCL"},
-            {name: "Leicester", code: "LEI"}, {name: "Derby", code: "DBY"},
-            {name: "Milton Keynes Central", code: "MKC"}, {name: "Coventry", code: "COV"},
-            {name: "Wolverhampton", code: "WQV"}, {name: "Stoke-on-Trent", code: "SOT"},
-            {name: "Crewe", code: "CRE"}, {name: "Preston", code: "PRE"},
-            {name: "Carlisle", code: "CAR"}, {name: "Lancaster", code: "LAN"}
-        ];
-
-
-        /* --- 2. DOM Elements --- */
+        // --- DOM Elements ---
         const els = {
             form: document.getElementById('search-form'),
             btn: document.getElementById('submit-button'),
@@ -565,10 +516,7 @@
             kpiMinor: document.getElementById('delayed-15-29-office')
         };
 
-
-        /* --- 3. Core Logic --- */
-
-        // Initialization
+        // --- Initialization ---
         function init() {
             const today = new Date();
             els.datePicker.value = formatDateForAPI(today);
@@ -601,26 +549,40 @@
             });
             
             // Autocomplete setup
-            setupAutocomplete(els.outFrom, document.getElementById('results-setting-outbound-from'), els.outFromCode, true);
-            setupAutocomplete(els.outTo, document.getElementById('results-setting-outbound-to'), els.outToCode, true);
+            // Ensure stationData is loaded before using it
+            if (typeof stationData !== 'undefined') {
+                setupAutocomplete(els.outFrom, document.getElementById('results-setting-outbound-from'), els.outFromCode, true);
+                setupAutocomplete(els.outTo, document.getElementById('results-setting-outbound-to'), els.outToCode, true);
+            } else {
+                console.error("Station data not loaded!");
+            }
             
             // Filter toggle
             els.toggleDelay.addEventListener('change', () => renderTable(lastResults));
         }
 
-        // Settings Handling
+        // --- Settings Handling ---
         function loadSettings() {
             const stored = localStorage.getItem('railDelaySettings');
             if (stored) {
-                const s = JSON.parse(stored);
-                els.priceInput.value = s.ticketPrice || '7437.92';
-                els.outFromCode.value = s.outFromCode || 'DID';
-                els.outToCode.value = s.outToCode || 'PAD';
-                els.outFrom.value = s.outFromDisplay || 'Didcot Parkway';
-                els.outTo.value = s.outToDisplay || 'London Paddington';
-                
-                if (s.officeDays) {
-                    els.officeDaysInputs.forEach(cb => cb.checked = s.officeDays.includes(cb.value));
+                try {
+                    const s = JSON.parse(stored);
+                    els.priceInput.value = s.ticketPrice || '7437.92';
+                    els.outFromCode.value = s.outFromCode || 'DID';
+                    els.outToCode.value = s.outToCode || 'PAD';
+                    els.outFrom.value = s.outFromDisplay || 'Didcot Parkway';
+                    els.outTo.value = s.outToDisplay || 'London Paddington';
+                    
+                    if(s.fromTimeOutbound) els.timeOutStart.value = s.fromTimeOutbound;
+                    if(s.toTimeOutbound) els.timeOutEnd.value = s.toTimeOutbound;
+                    if(s.fromTimeInbound) els.timeInStart.value = s.fromTimeInbound;
+                    if(s.toTimeInbound) els.timeInEnd.value = s.toTimeInbound;
+                    
+                    if (s.officeDays) {
+                        els.officeDaysInputs.forEach(cb => cb.checked = s.officeDays.includes(cb.value));
+                    }
+                } catch(e) {
+                    console.error("Error loading settings", e);
                 }
             }
             syncReturnJourney();
@@ -635,6 +597,10 @@
                 outToCode: els.outToCode.value,
                 outFromDisplay: els.outFrom.value,
                 outToDisplay: els.outTo.value,
+                fromTimeOutbound: els.timeOutStart.value,
+                toTimeOutbound: els.timeOutEnd.value,
+                fromTimeInbound: els.timeInStart.value,
+                toTimeInbound: els.timeInEnd.value,
                 officeDays: days
             };
             localStorage.setItem('railDelaySettings', JSON.stringify(s));
@@ -644,7 +610,6 @@
         }
 
         function syncReturnJourney() {
-            // Auto-fill return journey based on outbound
             els.inFrom.value = els.outTo.value;
             els.inFromCode.value = els.outToCode.value;
             els.inTo.value = els.outFrom.value;
@@ -669,107 +634,226 @@
         }
 
         // --- Search Logic ---
-        let lastResults = []; // Store for filtering
+        let lastResults = []; 
+
+        const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
         async function handleSearch(e) {
             e.preventDefault();
+            
+            // Ensure config variables exist
+            if (typeof METRICS_URL === 'undefined' || typeof DETAILS_URL === 'undefined') {
+                showStatus('Configuration Error: Check config.js', 'error');
+                return;
+            }
+            
             setLoading(true);
             els.resultsArea.classList.add('hidden');
+            showStatus("Preparing search...", "info");
             
             const searchType = document.querySelector('input[name="search-type"]:checked').value;
             const isWeek = searchType === 'week';
             const dateStr = els.datePicker.value;
-            
-            // Simulate API Delay
-            await new Promise(r => setTimeout(r, 1500));
+            const officeDays = new Set();
+            if (isWeek) {
+                els.officeDaysInputs.forEach(cb => { if (cb.checked) officeDays.add(parseInt(cb.value, 10)); });
+            }
 
-            // MOCK DATA GENERATION (Since we don't have the real backend)
-            // In a real app, you would fetch(METRICS_URL) here.
-            const results = generateMockData(dateStr, isWeek);
-            
-            lastResults = results;
-            calculateKPIs(results);
-            renderTable(results);
-            
-            setLoading(false);
-            els.resultsArea.classList.remove('hidden');
-            
-            // Scroll to results
-            setTimeout(() => {
-                els.resultsArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 100);
-        }
-
-        function generateMockData(startDateStr, isWeek) {
-            const data = [];
-            const baseDate = new Date(startDateStr);
-            const daysToCheck = isWeek ? 5 : 1;
-            
-            // Only generate for checked days if week view
-            const activeDays = Array.from(els.officeDaysInputs).filter(c => c.checked).map(c => parseInt(c.value));
-
-            for (let i = 0; i < daysToCheck; i++) {
-                const current = new Date(baseDate);
-                if (isWeek) {
-                    const mondayDiff = current.getDay() === 0 ? -6 : 1 - current.getDay(); // Get Monday
-                    current.setDate(current.getDate() + mondayDiff + i);
+            // 1. Prepare Dates
+            let daysToFetch = [];
+            if (isWeek) {
+                const monday = getMonday(new Date(dateStr));
+                for (let i = 0; i < 5; i++) {
+                    const d = new Date(monday.getTime());
+                    d.setDate(monday.getDate() + i);
+                    daysToFetch.push(formatDateForAPI(d));
                 }
-                
-                const dayIndex = current.getDay(); // 1=Mon
-                
-                // Skip if not in selected office days (for week view) or weekend
-                if (dayIndex === 0 || dayIndex === 6) continue;
-                if (isWeek && !activeDays.includes(dayIndex)) continue;
-
-                const dateDisplay = formatDateForDisplay(current);
-                
-                // 1. Outbound (Morning)
-                data.push(createMockService(dateDisplay, 'Outbound', els.timeOutStart.value, 0.2)); // 20% chance of delay
-                
-                // 2. Inbound (Evening)
-                data.push(createMockService(dateDisplay, 'Inbound', els.timeInStart.value, 0.4)); // 40% chance of delay
-            }
-            return data;
-        }
-
-        function createMockService(date, type, baseTime, failRate) {
-            const isDelayed = Math.random() < failRate;
-            const isCancelled = isDelayed && Math.random() < 0.2;
-            
-            const [h, m] = baseTime.split(':').map(Number);
-            const schDep = formatTimeStr(h, m + Math.floor(Math.random() * 15));
-            const schArr = formatTimeStr(h, m + 45); // 45 min journey
-            
-            let actArr = schArr;
-            let delay = 0;
-
-            if (isCancelled) {
-                actArr = null;
-            } else if (isDelayed) {
-                delay = Math.floor(Math.random() * 70) + 5; // 5 to 75 min delay
-                const [ah, am] = schArr.split(':').map(Number);
-                const totalMins = ah * 60 + am + delay;
-                actArr = formatTimeStr(Math.floor(totalMins / 60), totalMins % 60);
+            } else {
+                daysToFetch.push(dateStr);
             }
 
-            return {
-                date,
-                type,
-                schDep: schDep.replace(':',''),
-                schArr: schArr.replace(':',''),
-                actArr: actArr ? actArr.replace(':','') : null,
-                delay: isCancelled ? 999 : delay, // 999 flag for calc
-                isCancelled
-            };
-        }
+            // 2. Prepare Journeys
+            const journeys = [
+                { type: "Outbound", from: els.outFromCode.value, to: els.outToCode.value, start: els.timeOutStart.value, end: els.timeOutEnd.value },
+                { type: "Inbound", from: els.inFromCode.value, to: els.inToCode.value, start: els.timeInStart.value, end: els.timeInEnd.value }
+            ];
 
-        function formatTimeStr(h, m) {
-            return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+            let allServices = [];
+            let allRids = [];
+            let failedRequests = [];
+
+            try {
+                // --- STEP 1: Fetch Metrics (Get RIDs) ---
+                for (const d of daysToFetch) {
+                    const dayDate = new Date(d);
+                    const dayIndex = dayDate.getDay(); // 1=Mon
+                    
+                    // Skip if week mode and day not selected
+                    if(isWeek && !officeDays.has(dayIndex)) continue;
+                    // Skip weekends in day mode
+                    if(!isWeek && (dayIndex === 0 || dayIndex === 6)) {
+                        showStatus("Selected date is a weekend.", "error");
+                        setLoading(false);
+                        return;
+                    }
+
+                    for (const j of journeys) {
+                        setLoading(true, `Checking ${j.type} for ${d}...`); 
+                        
+                        const payload = {
+                            from_loc: j.from,
+                            to_loc: j.to,
+                            from_time: j.start.replace(':',''),
+                            to_time: j.end.replace(':',''),
+                            from_date: d,
+                            to_date: d,
+                            days: "WEEKDAY"
+                        };
+
+                        let success = false;
+                        let attempt = 1;
+                        
+                        while(attempt <= 2 && !success) {
+                            try {
+                                const res = await fetch(METRICS_URL, {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/json'},
+                                    body: JSON.stringify(payload)
+                                });
+
+                                if (!res.ok) {
+                                    if (res.status === 429) {
+                                        await wait(RETRY_DELAY);
+                                        attempt++;
+                                        continue;
+                                    }
+                                    throw new Error(`HTTP ${res.status}`);
+                                }
+
+                                const data = await res.json();
+                                if (data.Services) {
+                                    data.Services.forEach(s => {
+                                        const rid = s.serviceAttributesMetrics?.rids?.[0];
+                                        if (rid && !allRids.includes(rid)) {
+                                            allRids.push(rid);
+                                            allServices.push({ rid, date: d, type: j.type, from: j.from, to: j.to });
+                                        }
+                                    });
+                                }
+                                success = true;
+                            } catch (err) {
+                                console.error(err);
+                                if(attempt === 2) failedRequests.push(`${d} ${j.type}`);
+                                attempt++;
+                            } finally {
+                                if(success || attempt > 2) await wait(RATE_LIMIT_DELAY);
+                            }
+                        }
+                    }
+                }
+
+                if (allServices.length === 0) {
+                    showStatus("No services found for these times.", "info");
+                    setLoading(false);
+                    return;
+                }
+
+                // --- STEP 2: Fetch Details ---
+                let detailedServices = [];
+                let total = allServices.length;
+                
+                for (let i = 0; i < total; i++) {
+                    const svc = allServices[i];
+                    if(i % 2 === 0) setLoading(true, `Details: ${i+1}/${total}`);
+
+                    let success = false;
+                    let attempt = 1;
+                    let detailsData = null;
+
+                    while(attempt <= 2 && !success) {
+                        try {
+                            const res = await fetch(DETAILS_URL, {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify({ rid: svc.rid })
+                            });
+
+                            if(!res.ok) {
+                                if(res.status === 429) { await wait(RETRY_DELAY); attempt++; continue; }
+                                throw new Error(`HTTP ${res.status}`);
+                            }
+
+                            detailsData = await res.json();
+                            success = true;
+                        } catch (err) {
+                             attempt++;
+                        } finally {
+                             if(success || attempt > 2) await wait(RATE_LIMIT_DELAY);
+                        }
+                    }
+
+                    if (success && detailsData) {
+                        const locs = detailsData.serviceAttributesDetails?.locations || [];
+                        const dep = locs.find(l => l.location === svc.from);
+                        const arr = locs.find(l => l.location === svc.to);
+                        
+                        if (dep && arr) {
+                            const isCancelled = !arr.actual_ta || arr.actual_ta === "";
+                            // Calculate Delay
+                            let delay = 0;
+                            if(!isCancelled) {
+                                const schTime = parseApiTime(arr.gbtt_pta);
+                                const actTime = parseApiTime(arr.actual_ta);
+                                if(schTime && actTime) {
+                                    // Handle day crossover
+                                    if(actTime < schTime - 43200000) actTime.setDate(actTime.getDate() + 1);
+                                    const diff = actTime - schTime;
+                                    delay = Math.max(0, Math.round(diff / 60000));
+                                }
+                            }
+                            
+                            detailedServices.push({
+                                date: svc.date,
+                                type: svc.type,
+                                schDep: dep.gbtt_ptd,
+                                schArr: arr.gbtt_pta,
+                                actArr: arr.actual_ta,
+                                delay: delay,
+                                isCancelled: isCancelled
+                            });
+                        }
+                    }
+                }
+
+                // --- STEP 3: Render ---
+                detailedServices.sort((a,b) => {
+                    if(a.date !== b.date) return a.date.localeCompare(b.date);
+                    return a.schDep.localeCompare(b.schDep);
+                });
+                
+                lastResults = detailedServices;
+                calculateKPIs(detailedServices);
+                renderTable(detailedServices);
+                
+                els.resultsArea.classList.remove('hidden');
+                showStatus(failedRequests.length > 0 ? "Finished with some errors." : "Analysis Complete", failedRequests.length > 0 ? "error" : "success");
+                
+                setTimeout(() => {
+                    els.resultsArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+
+            } catch (e) {
+                showStatus("Error during search: " + e.message, "error");
+            } finally {
+                setLoading(false);
+            }
         }
 
         function calculateKPIs(services) {
             const price = parseFloat(els.priceInput.value) || 0;
-            const perJourney = price / JOURNEYS_PER_YEAR;
+            // Use config constant if available, else fallback
+            const divisor = (typeof JOURNEYS_PER_YEAR !== 'undefined') ? JOURNEYS_PER_YEAR : 464;
+            const perJourney = price / divisor;
             
             let counts = { cancel: 0, sev: 0, maj: 0, med: 0, min: 0 };
             let refund = 0;
@@ -777,13 +861,13 @@
             services.forEach(s => {
                 if (s.isCancelled) {
                     counts.cancel++;
-                    refund += perJourney * 0.5; // Typically 50% for cancel (varies by operator)
+                    refund += perJourney * 0.5;
                 } else if (s.delay >= 120) {
                     counts.sev++;
-                    refund += perJourney * 2; // Return trip refund often
+                    refund += perJourney * 2; 
                 } else if (s.delay >= 60) {
                     counts.maj++;
-                    refund += perJourney * 1; // Full single refund
+                    refund += perJourney * 1; 
                 } else if (s.delay >= 30) {
                     counts.med++;
                     refund += perJourney * 0.5;
@@ -805,7 +889,6 @@
             els.tableBody.innerHTML = '';
             const showDelaysOnly = els.toggleDelay.checked;
             
-            // Filter
             const displayServices = showDelaysOnly 
                 ? services.filter(s => s.delay >= 15 || s.isCancelled)
                 : services;
@@ -816,16 +899,16 @@
             }
             els.noResults.classList.add('hidden');
 
+            const price = parseFloat(els.priceInput.value) || 0;
+            const divisor = (typeof JOURNEYS_PER_YEAR !== 'undefined') ? JOURNEYS_PER_YEAR : 464;
+            const perJourney = price / divisor;
+
             displayServices.forEach(s => {
                 const row = document.createElement('tr');
-                // Note: Added data-label attributes for CSS mobile card view
                 
                 let statusClass = "text-gray-900";
                 let statusText = s.delay > 0 ? `${s.delay}m` : "On Time";
                 let refundText = "£0.00";
-                
-                const price = parseFloat(els.priceInput.value) || 0;
-                const perJourney = price / JOURNEYS_PER_YEAR;
 
                 if (s.isCancelled) {
                     statusClass = "text-danger";
@@ -843,7 +926,7 @@
                 const formattedActArr = s.isCancelled ? 'Cancelled' : formatTime(s.actArr);
 
                 row.innerHTML = `
-                    <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-900" data-label="Date">${s.date}</td>
+                    <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-900" data-label="Date">${formatDateForDisplay(new Date(s.date))}</td>
                     <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-500" data-label="Type">${s.type}</td>
                     <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-500" data-label="Sch. Dep">${formattedSchDep}</td>
                     <td class="py-3 px-4 whitespace-nowrap text-sm font-medium ${s.isCancelled ? 'text-danger' : 'text-gray-900'}" data-label="Act. Arr">${formattedActArr}</td>
@@ -855,8 +938,17 @@
         }
 
 
-        /* --- 4. Utilities --- */
+        /* --- Utilities --- */
         
+        function getMonday(d) { d = new Date(d); let day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6 : 1); return new Date(d.setDate(diff)); }
+        
+        function parseApiTime(timeStr) {
+            if (!timeStr || timeStr.length !== 4) return null;
+            const h = parseInt(timeStr.substring(0, 2), 10);
+            const m = parseInt(timeStr.substring(2, 4), 10);
+            return new Date(1970, 0, 1, h, m, 0);
+        }
+
         function setupAutocomplete(input, results, codeInput, isOutbound) {
             input.addEventListener('input', function() {
                 const val = this.value.toLowerCase();
@@ -875,7 +967,7 @@
                             input.value = s.name;
                             codeInput.value = s.code;
                             results.classList.add('hidden');
-                            syncReturnJourney(); // Update return journey
+                            syncReturnJourney();
                         });
                         results.appendChild(div);
                     });
@@ -884,16 +976,15 @@
                 }
             });
             
-            // Close on click outside
             document.addEventListener('click', (e) => {
                 if (!input.contains(e.target) && !results.contains(e.target)) results.classList.add('hidden');
             });
         }
 
-        function setLoading(bool) {
+        function setLoading(bool, msg) {
             els.btn.disabled = bool;
             if (bool) {
-                els.btnText.textContent = "Analysing...";
+                els.btnText.textContent = msg || "Analysing...";
                 els.btnSpinner.classList.remove('hidden');
                 els.btn.classList.add('opacity-75', 'cursor-wait');
             } else {
@@ -906,7 +997,7 @@
         function showStatus(msg, type) {
             els.status.textContent = msg;
             els.status.className = `text-center text-xs font-bold mt-2 transition-all ${type === 'error' ? 'text-red-500' : 'text-emerald-600'}`;
-            setTimeout(() => els.status.textContent = '', 4000);
+            setTimeout(() => { if(els.status.textContent === msg) els.status.textContent = ''; }, 4000);
         }
 
         function formatDateForAPI(d) {
