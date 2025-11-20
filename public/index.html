@@ -11,7 +11,7 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         .blob { position: absolute; filter: blur(40px); z-index: -1; opacity: 0.5; }
-        /* Autocomplete Styles (Reused) */
+        /* Autocomplete Styles */
         .autocomplete-results {
             position: absolute;
             top: 100%; left: 0; right: 0;
@@ -48,7 +48,6 @@
 
     <!-- Hero Section -->
     <main class="relative max-w-7xl mx-auto px-6 lg:px-8 pt-20 pb-32 sm:pt-32 text-center">
-        <!-- Background Blobs -->
         <div class="blob bg-emerald-200 w-96 h-96 rounded-full top-0 left-1/4 -translate-x-1/2 mix-blend-multiply animate-blob"></div>
         <div class="blob bg-blue-200 w-96 h-96 rounded-full top-0 right-1/4 translate-x-1/2 mix-blend-multiply animate-blob animation-delay-2000"></div>
 
@@ -72,10 +71,7 @@
         </div>
     </main>
 
-    <!-- Features Grid (Same as before) -->
-    <!-- ... (Skipping middle section for brevity, kept in final file) ... -->
-
-    <!-- Email Subscription Section (UPDATED) -->
+    <!-- Email Subscription Section -->
     <section id="signup" class="py-24">
         <div class="max-w-4xl mx-auto px-6 lg:px-8">
             <div class="bg-slate-900 rounded-3xl p-8 sm:p-16 text-center text-white overflow-hidden relative isolate">
@@ -85,7 +81,7 @@
                         Set your route once. We'll email you automatically when you are owed compensation.
                     </p>
                     
-                    <form id="subscription-form" class="max-w-md mx-auto space-y-4 text-left">
+                    <form id="subscription-form" class="max-w-md mx-auto space-y-6 text-left">
                         
                         <!-- Email -->
                         <div>
@@ -109,16 +105,31 @@
                             </div>
                         </div>
 
-                        <!-- Time Row -->
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Morning Train</label>
-                                <input type="time" name="morningTime" value="08:00" class="w-full px-4 py-3 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Evening Train</label>
-                                <input type="time" name="eveningTime" value="17:30" class="w-full px-4 py-3 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium">
-                            </div>
+                        <!-- Time Ranges Row -->
+                        <div class="space-y-4">
+                             <div class="grid grid-cols-2 gap-4">
+                                 <div class="col-span-2"><label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Morning Commute</label></div>
+                                 <div>
+                                    <input type="time" name="morningStart" value="07:00" class="w-full px-4 py-3 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-sm">
+                                    <span class="text-[10px] text-slate-400 ml-1">Depart After</span>
+                                 </div>
+                                 <div>
+                                    <input type="time" name="morningEnd" value="08:00" class="w-full px-4 py-3 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-sm">
+                                    <span class="text-[10px] text-slate-400 ml-1">Depart Before</span>
+                                 </div>
+                             </div>
+                             
+                             <div class="grid grid-cols-2 gap-4">
+                                 <div class="col-span-2"><label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Evening Commute</label></div>
+                                 <div>
+                                    <input type="time" name="eveningStart" value="17:00" class="w-full px-4 py-3 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-sm">
+                                    <span class="text-[10px] text-slate-400 ml-1">Depart After</span>
+                                 </div>
+                                 <div>
+                                    <input type="time" name="eveningEnd" value="18:00" class="w-full px-4 py-3 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-sm">
+                                    <span class="text-[10px] text-slate-400 ml-1">Depart Before</span>
+                                 </div>
+                             </div>
                         </div>
 
                         <button type="submit" id="sub-btn" class="w-full px-8 py-4 bg-emerald-600 hover:bg-emerald-500 font-bold rounded-xl transition-all shadow-lg shadow-emerald-900/20 mt-6">
@@ -154,15 +165,12 @@
     <!-- Scripts -->
     <script src="station_data.js"></script>
     <script>
-        // --- Autocomplete Logic (Copied from App for consistency) ---
         function setupAutocomplete(input, results, codeInput) {
             input.addEventListener('input', function() {
                 const val = this.value.toLowerCase();
                 results.innerHTML = '';
                 if (val.length < 2) { results.classList.add('hidden'); return; }
-                
                 const matches = stationData.filter(s => s.name.toLowerCase().includes(val) || s.code.toLowerCase().includes(val)).slice(0,5);
-                
                 if (matches.length > 0) {
                     results.classList.remove('hidden');
                     matches.forEach(s => {
@@ -176,17 +184,11 @@
                         });
                         results.appendChild(div);
                     });
-                } else {
-                    results.classList.add('hidden');
-                }
+                } else { results.classList.add('hidden'); }
             });
-            
-            document.addEventListener('click', (e) => {
-                if (!input.contains(e.target) && !results.contains(e.target)) results.classList.add('hidden');
-            });
+            document.addEventListener('click', (e) => { if (!input.contains(e.target) && !results.contains(e.target)) results.classList.add('hidden'); });
         }
 
-        // Wait for station data
         const checkStations = setInterval(() => {
             if (typeof stationData !== 'undefined' && stationData.length > 0) {
                 clearInterval(checkStations);
@@ -195,7 +197,6 @@
             }
         }, 100);
 
-        // --- Form Handling ---
         document.getElementById('subscription-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('sub-btn');
@@ -205,8 +206,10 @@
                 email: formData.get('email'),
                 fromCode: formData.get('fromCode'),
                 toCode: formData.get('toCode'),
-                morningTime: formData.get('morningTime'),
-                eveningTime: formData.get('eveningTime')
+                morningStart: formData.get('morningStart'),
+                morningEnd: formData.get('morningEnd'),
+                eveningStart: formData.get('eveningStart'),
+                eveningEnd: formData.get('eveningEnd')
             };
 
             if(!payload.fromCode || !payload.toCode) {
@@ -231,9 +234,7 @@
                     status.className = "text-center text-sm mt-2 font-bold text-emerald-400";
                     btn.textContent = "Subscribed ✓";
                     e.target.reset();
-                } else {
-                    throw new Error("Server error");
-                }
+                } else { throw new Error("Server error"); }
             } catch (err) {
                 status.textContent = "Error saving subscription. Please try again.";
                 status.className = "text-center text-sm mt-2 font-bold text-red-400";

@@ -23,7 +23,6 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
-        /* Mobile Card View for Tables */
         @media (max-width: 768px) {
             .mobile-table-card thead { display: none; }
             .mobile-table-card tbody tr { display: flex; flex-direction: column; background: white; border: 1px solid #e5e7eb; border-radius: 0.75rem; margin-bottom: 1rem; padding: 1rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
@@ -32,33 +31,33 @@
             .mobile-table-card td:last-child { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #f3f4f6; font-weight: 700; font-size: 1.1rem; }
         }
 
-        /* Progress Bar Styles */
         .progress-container { width: 100%; background-color: #e5e7eb; border-radius: 9999px; height: 0.5rem; overflow: hidden; margin-top: 0.75rem; }
         .progress-bar { height: 100%; background-color: #10b981; width: 0%; transition: width 0.3s ease-out; }
-
         .text-danger { color: #ef4444; font-weight: 600; }
         .text-success { color: #22c55e; font-weight: 600; }
         
         input[type="time"], input[type="date"], select { -webkit-appearance: none; appearance: none; background-color: #fff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.6rem 0.875rem; font-size: 1rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
         input:focus { outline: none; border-color: #10b981; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); }
-
         #settings-panel { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .toggle-checkbox:checked { right: 0; border-color: #10b981; }
         .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
         .kpi-card { transition: transform 0.2s; }
         .kpi-card:active { transform: scale(0.98); }
-
         .kpi-scroller { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; }
         @media (max-width: 640px) {
             .kpi-scroller { display: flex; overflow-x: auto; padding-bottom: 1rem; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; margin-right: -1rem; padding-right: 1rem; }
             .kpi-scroller > * { flex: 0 0 140px; scroll-snap-align: start; }
         }
-        
         .autocomplete-results { max-height: 200px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-
-        /* Cache/Live Badges */
         .cache-badge { display: inline-flex; align-items: center; background-color: #dbeafe; color: #1e40af; padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; border: 1px solid #bfdbfe; }
         .api-badge { display: inline-flex; align-items: center; background-color: #dcfce7; color: #166534; padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; border: 1px solid #bbf7d0; }
+        
+        /* TOC Badges */
+        .toc-badge { padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: white; }
+        .toc-gw { background-color: #0a4c3f; } /* GWR Dark Green */
+        .toc-sw { background-color: #0193d7; } /* SWR Blue */
+        .toc-vt { background-color: #b50e24; } /* Virgin/Avanti Red */
+        .toc-default { background-color: #64748b; } /* Generic Slate */
     </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50">
@@ -109,49 +108,8 @@
                      <input type="text" id="ticket-price-settings" inputmode="decimal" value="7437.92" class="w-full pl-8 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-lg font-bold text-slate-900 placeholder-slate-300">
                  </div>
              </div>
-
-             <!-- Journey Settings -->
-             <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-6">
-                 <div class="flex items-center mb-2">
-                     <div class="p-2 bg-blue-100 rounded-lg mr-3 text-blue-600">
-                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
-                     </div>
-                     <h3 class="font-bold text-slate-900">Route Configuration</h3>
-                 </div>
-                 
-                 <div class="space-y-5">
-                     <div class="autocomplete-container relative">
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Home Station</label>
-                        <input type="text" id="setting-outbound-from" class="w-full rounded-xl border-slate-200 py-3 text-sm font-medium focus:ring-emerald-500 focus:border-emerald-500" placeholder="Start Station...">
-                        <div class="autocomplete-results hidden absolute w-full bg-white border border-slate-200 rounded-b-xl shadow-xl z-50" id="results-setting-outbound-from"></div>
-                        <input type="hidden" id="setting-outbound-from-code" value="DID"> 
-                    </div>
-                     <div class="autocomplete-container relative">
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Work Station</label>
-                        <input type="text" id="setting-outbound-to" class="w-full rounded-xl border-slate-200 py-3 text-sm font-medium focus:ring-emerald-500 focus:border-emerald-500" placeholder="End Station...">
-                        <div class="autocomplete-results hidden absolute w-full bg-white border border-slate-200 rounded-b-xl shadow-xl z-50" id="results-setting-outbound-to"></div>
-                        <input type="hidden" id="setting-outbound-to-code" value="PAD">
-                     </div>
-                 </div>
-                 
-                 <div class="relative py-2">
-                    <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-slate-100"></div></div>
-                    <div class="relative flex justify-center"><span class="bg-white px-3 text-xs font-medium text-slate-400">Return Journey (Auto-filled)</span></div>
-                 </div>
-
-                 <div class="space-y-5 opacity-60 pointer-events-none select-none">
-                     <div class="autocomplete-container relative">
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Return From (Work)</label>
-                        <input type="text" id="setting-inbound-from" class="w-full rounded-xl border-slate-200 py-3 text-sm bg-slate-50" readonly>
-                        <input type="hidden" id="setting-inbound-from-code" value="PAD">
-                     </div>
-                     <div class="autocomplete-container relative">
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Return To (Home)</label>
-                        <input type="text" id="setting-inbound-to" class="w-full rounded-xl border-slate-200 py-3 text-sm bg-slate-50" readonly>
-                        <input type="hidden" id="setting-inbound-to-code" value="DID">
-                     </div>
-                 </div>
-             </div>
+             
+             <!-- Note: Station settings removed from here as they are now on the main dashboard -->
         </div>
         
         <div class="flex-none p-6 border-t border-slate-100 bg-slate-50 safe-area-bottom">
@@ -161,15 +119,42 @@
 
     <!-- Main Content -->
     <main class="flex-grow max-w-3xl mx-auto w-full px-4 sm:px-6 py-8 space-y-8">
-
+        
         <!-- Search Card -->
         <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="p-6 sm:p-8 bg-white border-b border-slate-100">
+             <!-- (Form Content) -->
+             <div class="p-6 sm:p-8 bg-white border-b border-slate-100">
                 <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Find Delays</h1>
                 <p class="text-slate-500 text-sm mt-1 font-medium">Analyse your commute for compensation.</p>
             </div>
 
             <form id="search-form" class="p-6 sm:p-8 space-y-8">
+
+                <!-- Station Selection (Moved from Settings) -->
+                <div class="space-y-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div class="autocomplete-container relative">
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Home Station</label>
+                            <input type="text" id="setting-outbound-from" class="w-full rounded-xl border-slate-200 py-3 text-sm font-semibold text-slate-700 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. Manchester Piccadilly">
+                            <div class="autocomplete-results hidden absolute w-full bg-white border border-slate-200 rounded-b-xl shadow-xl z-50" id="results-setting-outbound-from"></div>
+                            <input type="hidden" id="setting-outbound-from-code" value=""> 
+                        </div>
+                        <div class="autocomplete-container relative">
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Work Station</label>
+                            <input type="text" id="setting-outbound-to" class="w-full rounded-xl border-slate-200 py-3 text-sm font-semibold text-slate-700 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. London Euston">
+                            <div class="autocomplete-results hidden absolute w-full bg-white border border-slate-200 rounded-b-xl shadow-xl z-50" id="results-setting-outbound-to"></div>
+                            <input type="hidden" id="setting-outbound-to-code" value="">
+                        </div>
+                    </div>
+                    
+                    <!-- Hidden fields for return journey (auto-sync handled by JS) -->
+                    <input type="hidden" id="setting-inbound-from">
+                    <input type="hidden" id="setting-inbound-from-code">
+                    <input type="hidden" id="setting-inbound-to">
+                    <input type="hidden" id="setting-inbound-to-code">
+                </div>
+
+                <div class="border-t border-slate-100 my-2"></div>
 
                 <!-- Search Type & Date -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -200,62 +185,30 @@
                 <div id="days-in-office-group">
                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Days Travelled</label>
                     <div class="flex justify-between gap-2 sm:gap-4">
-                        <!-- Day Checkboxes (Styled as circular toggles) -->
-                        <label class="flex flex-col items-center cursor-pointer group select-none">
-                            <input type="checkbox" name="daysInOffice" value="1" checked class="peer sr-only">
-                            <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-sm font-bold peer-checked:bg-emerald-500 peer-checked:text-white transition-all group-active:scale-90 border border-transparent peer-checked:border-emerald-600 shadow-sm">M</div>
-                        </label>
-                        <label class="flex flex-col items-center cursor-pointer group select-none">
-                            <input type="checkbox" name="daysInOffice" value="2" checked class="peer sr-only">
-                            <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-sm font-bold peer-checked:bg-emerald-500 peer-checked:text-white transition-all group-active:scale-90 border border-transparent peer-checked:border-emerald-600 shadow-sm">T</div>
-                        </label>
-                        <label class="flex flex-col items-center cursor-pointer group select-none">
-                            <input type="checkbox" name="daysInOffice" value="3" checked class="peer sr-only">
-                            <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-sm font-bold peer-checked:bg-emerald-500 peer-checked:text-white transition-all group-active:scale-90 border border-transparent peer-checked:border-emerald-600 shadow-sm">W</div>
-                        </label>
-                        <label class="flex flex-col items-center cursor-pointer group select-none">
-                            <input type="checkbox" name="daysInOffice" value="4" checked class="peer sr-only">
-                            <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-sm font-bold peer-checked:bg-emerald-500 peer-checked:text-white transition-all group-active:scale-90 border border-transparent peer-checked:border-emerald-600 shadow-sm">T</div>
-                        </label>
-                        <label class="flex flex-col items-center cursor-pointer group select-none">
-                            <input type="checkbox" name="daysInOffice" value="5" class="peer sr-only">
-                            <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-sm font-bold peer-checked:bg-emerald-500 peer-checked:text-white transition-all group-active:scale-90 border border-transparent peer-checked:border-emerald-600 shadow-sm">F</div>
-                        </label>
+                        <label class="flex flex-col items-center cursor-pointer group select-none"><input type="checkbox" name="daysInOffice" value="1" checked class="peer sr-only"><div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-sm font-bold peer-checked:bg-emerald-500 peer-checked:text-white transition-all group-active:scale-90 border border-transparent peer-checked:border-emerald-600 shadow-sm">M</div></label>
+                        <label class="flex flex-col items-center cursor-pointer group select-none"><input type="checkbox" name="daysInOffice" value="2" checked class="peer sr-only"><div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-sm font-bold peer-checked:bg-emerald-500 peer-checked:text-white transition-all group-active:scale-90 border border-transparent peer-checked:border-emerald-600 shadow-sm">T</div></label>
+                        <label class="flex flex-col items-center cursor-pointer group select-none"><input type="checkbox" name="daysInOffice" value="3" checked class="peer sr-only"><div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-sm font-bold peer-checked:bg-emerald-500 peer-checked:text-white transition-all group-active:scale-90 border border-transparent peer-checked:border-emerald-600 shadow-sm">W</div></label>
+                        <label class="flex flex-col items-center cursor-pointer group select-none"><input type="checkbox" name="daysInOffice" value="4" checked class="peer sr-only"><div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-sm font-bold peer-checked:bg-emerald-500 peer-checked:text-white transition-all group-active:scale-90 border border-transparent peer-checked:border-emerald-600 shadow-sm">T</div></label>
+                        <label class="flex flex-col items-center cursor-pointer group select-none"><input type="checkbox" name="daysInOffice" value="5" class="peer sr-only"><div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-sm font-bold peer-checked:bg-emerald-500 peer-checked:text-white transition-all group-active:scale-90 border border-transparent peer-checked:border-emerald-600 shadow-sm">F</div></label>
                     </div>
                 </div>
 
                 <!-- Time Selection -->
                 <div class="space-y-6 pt-4 border-t border-slate-100">
                      <div class="grid grid-cols-2 gap-6">
-                         <div class="col-span-2 flex justify-between items-center">
-                             <span class="text-sm font-bold text-slate-900">Morning Commute <span class="text-slate-400 font-normal ml-1" id="outbound-route-display"></span></span>
-                         </div>
-                         <div>
-                            <label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-2 font-bold">Depart After</label>
-                            <input type="time" id="from-time-outbound" value="07:00" class="w-full rounded-xl border-slate-200 text-sm py-3 font-semibold text-slate-700 focus:border-emerald-500 focus:ring-emerald-500">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-2 font-bold">Depart Before</label>
-                            <input type="time" id="to-time-outbound" value="07:30" class="w-full rounded-xl border-slate-200 text-sm py-3 font-semibold text-slate-700 focus:border-emerald-500 focus:ring-emerald-500">
-                        </div>
+                         <div class="col-span-2 flex justify-between items-center"><span class="text-sm font-bold text-slate-900">Morning Commute <span class="text-slate-400 font-normal ml-1" id="outbound-route-display"></span></span></div>
+                         <div><label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-2 font-bold">Depart After</label><input type="time" id="from-time-outbound" value="07:00" class="w-full rounded-xl border-slate-200 text-sm py-3 font-semibold text-slate-700 focus:border-emerald-500 focus:ring-emerald-500"></div>
+                         <div><label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-2 font-bold">Depart Before</label><input type="time" id="to-time-outbound" value="07:30" class="w-full rounded-xl border-slate-200 text-sm py-3 font-semibold text-slate-700 focus:border-emerald-500 focus:ring-emerald-500"></div>
                      </div>
                      
                      <div class="grid grid-cols-2 gap-6">
-                         <div class="col-span-2 flex justify-between items-center mt-2">
-                             <span class="text-sm font-bold text-slate-900">Evening Commute <span class="text-slate-400 font-normal ml-1" id="inbound-route-display"></span></span>
-                         </div>
-                         <div>
-                            <label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-2 font-bold">Depart After</label>
-                            <input type="time" id="from-time-inbound" value="17:00" class="w-full rounded-xl border-slate-200 text-sm py-3 font-semibold text-slate-700 focus:border-emerald-500 focus:ring-emerald-500">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-2 font-bold">Depart Before</label>
-                            <input type="time" id="to-time-inbound" value="17:30" class="w-full rounded-xl border-slate-200 text-sm py-3 font-semibold text-slate-700 focus:border-emerald-500 focus:ring-emerald-500">
-                        </div>
+                         <div class="col-span-2 flex justify-between items-center mt-2"><span class="text-sm font-bold text-slate-900">Evening Commute <span class="text-slate-400 font-normal ml-1" id="inbound-route-display"></span></span></div>
+                         <div><label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-2 font-bold">Depart After</label><input type="time" id="from-time-inbound" value="17:00" class="w-full rounded-xl border-slate-200 text-sm py-3 font-semibold text-slate-700 focus:border-emerald-500 focus:ring-emerald-500"></div>
+                         <div><label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-2 font-bold">Depart Before</label><input type="time" id="to-time-inbound" value="17:30" class="w-full rounded-xl border-slate-200 text-sm py-3 font-semibold text-slate-700 focus:border-emerald-500 focus:ring-emerald-500"></div>
                      </div>
                 </div>
 
-                <!-- Progress Bar (New) -->
+                <!-- Progress Bar -->
                 <div id="progress-container" class="hidden mb-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
                     <div class="flex justify-between text-xs font-bold text-slate-500 mb-2">
                         <span id="progress-label">Initializing...</span>
@@ -269,14 +222,12 @@
                 <!-- Action Button -->
                 <button type="submit" id="submit-button" class="w-full bg-emerald-600 text-white py-4 rounded-2xl shadow-lg shadow-emerald-200 hover:shadow-emerald-300 hover:bg-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/30 transition-all duration-200 flex justify-center items-center text-lg font-bold active:scale-[0.98] transform">
                     <span id="btn-text">Check Performance</span>
-                    <!-- Spinner -->
                     <svg id="btn-spinner" class="animate-spin ml-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                 </button>
                 
                 <!-- Status Message and Cache Indicator -->
                 <div id="status-loading-container" class="flex justify-center items-center mt-6 min-h-[1.5rem] gap-2">
                      <div id="status-message" class="text-sm text-center font-medium text-slate-500"></div>
-                     <!-- Cache Badges -->
                      <span id="cache-indicator" class="cache-badge hidden" title="Data loaded from internal cache">
                         <svg class="w-3 h-3 mr-1.5" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path></svg>
                         Cached Data
@@ -701,7 +652,16 @@
                                         delay = Math.max(0, Math.round((actTime - schTime) / 60000));
                                     }
                                 }
-                                detailedServices.push({ date: item.svc.date, type: item.svc.type, schDep: dep.gbtt_ptd, schArr: arr.gbtt_pta, actArr: arr.actual_ta, delay: delay, isCancelled: isCancelled });
+                                detailedServices.push({ 
+                                    date: item.svc.date, 
+                                    type: item.svc.type, 
+                                    schDep: dep.gbtt_ptd, 
+                                    schArr: arr.gbtt_pta, 
+                                    actArr: arr.actual_ta, 
+                                    delay: delay, 
+                                    isCancelled: isCancelled,
+                                    toc: detailsData.serviceAttributesDetails.toc_code // Pass TOC code for display
+                                });
                             }
                         }
                     } catch(e) { console.warn(e); }
@@ -752,7 +712,7 @@
                     refund = perJourney * 0.5;
                 } else if (s.delay >= 120) {
                     counts.sev++;
-                    refund = perJourney * 2; // Note: This might cap at ticket cost depending on scheme, sticking to your multiplier for now
+                    refund = perJourney * 2; 
                 } else if (s.delay >= 60) {
                     counts.maj++;
                     refund = perJourney * 1; 
@@ -795,6 +755,7 @@
             const price = parseFloat(els.priceInput.value) || 0;
             const divisor = (typeof JOURNEYS_PER_YEAR !== 'undefined') ? JOURNEYS_PER_YEAR : 464;
             const perJourney = price / divisor;
+            
             displayServices.forEach(s => {
                 const row = document.createElement('tr');
                 let statusClass = "text-slate-900 font-medium";
@@ -806,11 +767,23 @@
                     let mult = s.delay >= 120 ? 2 : s.delay >= 60 ? 1 : s.delay >= 30 ? 0.5 : 0.25;
                     refundText = `£${(perJourney * mult).toFixed(2)}`;
                 } else { statusClass = "text-emerald-600"; }
+                
                 const formattedSchDep = formatTime(s.schDep);
                 const formattedActArr = s.isCancelled ? 'Cancelled' : formatTime(s.actArr);
+                
+                // NEW: TOC Badge logic
+                let tocBadge = '';
+                if (s.toc) {
+                    let tocClass = 'toc-default';
+                    if (s.toc === 'GW') tocClass = 'toc-gw';
+                    else if (s.toc === 'SW') tocClass = 'toc-sw';
+                    else if (s.toc === 'VT') tocClass = 'toc-vt';
+                    tocBadge = `<span class="toc-badge ${tocClass} ml-2">${s.toc}</span>`;
+                }
+
                 row.innerHTML = `
                     <td class="py-4 px-6 whitespace-nowrap text-sm text-slate-700" data-label="Date">${formatDateForDisplay(new Date(s.date))}</td>
-                    <td class="py-4 px-6 whitespace-nowrap text-sm text-slate-500" data-label="Type">${s.type}</td>
+                    <td class="py-4 px-6 whitespace-nowrap text-sm text-slate-500 flex items-center" data-label="Type">${s.type} ${tocBadge}</td>
                     <td class="py-4 px-6 whitespace-nowrap text-sm text-slate-700 font-medium" data-label="Sch. Dep">${formattedSchDep}</td>
                     <td class="py-4 px-6 whitespace-nowrap text-sm font-medium ${s.isCancelled ? 'text-red-600' : 'text-slate-700'}" data-label="Act. Arr">${formattedActArr}</td>
                     <td class="py-4 px-6 whitespace-nowrap text-sm ${statusClass}" data-label="Delay">${statusText}</td>
