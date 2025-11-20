@@ -521,8 +521,8 @@
                 <div
                     class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-3xl p-8 text-white shadow-xl shadow-emerald-100 mb-6 flex justify-between items-center transform hover:scale-[1.01] transition-transform duration-300">
                     <div>
-                        <p class="text-emerald-100 text-sm font-bold uppercase tracking-wider mb-1">Estimated Refund</p>
-                        <p id="total-refund-kpi-office" class="text-5xl font-extrabold tracking-tight">£0.00</p>
+                        <p class="text-emerald-100 text-sm font-bold uppercase tracking-wider mb-1">Potential Refund</p>
+                        <p id="total-refund-kpi-office" class="text-5xl font-extrabold tracking-tight">0.00</p>
                     </div>
                     <div class="bg-white/10 p-4 rounded-2xl backdrop-blur-sm border border-white/10">
                         <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1154,7 +1154,7 @@
                 totalRefund += maxRefunds[key];
             }
 
-            els.kpiRefund.innerText = `£${totalRefund.toFixed(2)}`;
+            els.kpiRefund.innerText = `${totalRefund.toFixed(2)}`;
             els.kpiCancel.innerText = counts.cancel;
             els.kpiSevere.innerText = counts.sev;
             els.kpiMajor.innerText = counts.maj;
