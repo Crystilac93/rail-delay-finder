@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#10b981"> 
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
     <title>RefundMyRail | Dashboard</title>
     
     <link rel="manifest" href="manifest.json">
@@ -16,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        /* ... (Styles same as before) ... */
+        /* --- Core Defaults --- */
         html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; overscroll-behavior-y: none; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
@@ -61,7 +59,8 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50">
-    <!-- ... (Navbar and Settings Panel same as before) ... -->
+
+    <!-- Navbar -->
     <nav class="bg-white shadow-sm sticky top-0 z-30 safe-area-top border-b border-slate-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
@@ -107,8 +106,6 @@
                      <input type="text" id="ticket-price-settings" inputmode="decimal" value="7437.92" class="w-full pl-8 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-lg font-bold text-slate-900 placeholder-slate-300">
                  </div>
              </div>
-
-             <!-- Journey Settings (Fields moved to main page, but kept structure for any future settings) -->
         </div>
         
         <div class="flex-none p-6 border-t border-slate-100 bg-slate-50 safe-area-bottom">
@@ -133,32 +130,30 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div class="autocomplete-container relative">
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Home Station</label>
-                            <!-- No defaults -->
-                            <input type="text" id="setting-outbound-from" class="w-full rounded-xl border-slate-200 py-3 text-sm font-semibold text-slate-700 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. Didcot Parkway">
+                            <!-- Placeholder updated, value is explicitly empty -->
+                            <input type="text" id="setting-outbound-from" class="w-full rounded-xl border-slate-200 py-3 text-sm font-semibold text-slate-700 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. Manchester Piccadilly" value="">
                             <div class="autocomplete-results hidden absolute w-full bg-white border border-slate-200 rounded-b-xl shadow-xl z-50" id="results-setting-outbound-from"></div>
                             <input type="hidden" id="setting-outbound-from-code" value=""> 
                         </div>
                         <div class="autocomplete-container relative">
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Work Station</label>
-                            <!-- No defaults -->
-                            <input type="text" id="setting-outbound-to" class="w-full rounded-xl border-slate-200 py-3 text-sm font-semibold text-slate-700 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. London Paddington">
+                            <!-- Placeholder updated, value is explicitly empty -->
+                            <input type="text" id="setting-outbound-to" class="w-full rounded-xl border-slate-200 py-3 text-sm font-semibold text-slate-700 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. London Euston" value="">
                             <div class="autocomplete-results hidden absolute w-full bg-white border border-slate-200 rounded-b-xl shadow-xl z-50" id="results-setting-outbound-to"></div>
                             <input type="hidden" id="setting-outbound-to-code" value="">
                         </div>
                     </div>
                     
-                    <!-- Hidden fields for return journey (auto-sync handled by JS) -->
-                    <input type="hidden" id="setting-inbound-from">
-                    <input type="hidden" id="setting-inbound-from-code">
-                    <input type="hidden" id="setting-inbound-to">
-                    <input type="hidden" id="setting-inbound-to-code">
+                    <input type="hidden" id="setting-inbound-from" value="">
+                    <input type="hidden" id="setting-inbound-from-code" value="">
+                    <input type="hidden" id="setting-inbound-to" value="">
+                    <input type="hidden" id="setting-inbound-to-code" value="">
                 </div>
 
                 <div class="border-t border-slate-100 my-2"></div>
 
                 <!-- Search Type & Date -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <!-- ... (Mode & Date selection same as before) ... -->
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Mode</label>
                         <div class="flex bg-slate-100 p-1.5 rounded-xl">
@@ -183,7 +178,6 @@
                 </div>
 
                 <!-- Days in Office -->
-                <!-- ... (Days inputs same as before) ... -->
                 <div id="days-in-office-group">
                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Days Travelled</label>
                     <div class="flex justify-between gap-2 sm:gap-4">
@@ -322,7 +316,7 @@
                             <tr>
                                 <th class="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
                                 <th class="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Type</th>
-                                <th class="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">TOC</th> <!-- NEW COLUMN -->
+                                <th class="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">TOC</th>
                                 <th class="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Sch. Dep</th>
                                 <th class="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Act. Arr</th>
                                 <th class="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Delay</th>
@@ -351,7 +345,7 @@
     <script src="station_data.js"></script>
     
     <script>
-        // ... (Constants and Dom Elements) ...
+        // ... (Dom Elements) ...
         const els = {
             form: document.getElementById('search-form'),
             btn: document.getElementById('submit-button'),
@@ -452,6 +446,7 @@
                 els.priceInput.value = val.toFixed(2);
             });
             
+            // Autocomplete setup relies on stationData being available globally
             if (typeof stationData !== 'undefined') {
                  setupAutocomplete(els.outFrom, document.getElementById('results-setting-outbound-from'), els.outFromCode, true);
                  setupAutocomplete(els.outTo, document.getElementById('results-setting-outbound-to'), els.outToCode, true);
@@ -474,26 +469,35 @@
             setLoading(false);
         }
 
+        // --- loadSettings: Safely loads settings without injecting defaults ---
         function loadSettings() {
             const stored = localStorage.getItem('railDelaySettings');
             if (stored) {
                 try {
                     const s = JSON.parse(stored);
-                    els.priceInput.value = s.ticketPrice || '7437.92';
                     
-                    // Only set values if they exist in storage. 
-                    // Do NOT provide defaults here anymore.
+                    // Price
+                    if (s.ticketPrice) els.priceInput.value = s.ticketPrice;
+                    
+                    // Station Codes (only set if validly stored)
                     if (s.outFromCode) els.outFromCode.value = s.outFromCode;
                     if (s.outToCode) els.outToCode.value = s.outToCode;
+                    // Station Display Names (only set if validly stored)
                     if (s.outFromDisplay) els.outFrom.value = s.outFromDisplay;
                     if (s.outToDisplay) els.outTo.value = s.outToDisplay;
                     
+                    // Times
                     if(s.fromTimeOutbound) els.timeOutStart.value = s.fromTimeOutbound;
                     if(s.toTimeOutbound) els.timeOutEnd.value = s.toTimeOutbound;
                     if(s.fromTimeInbound) els.timeInStart.value = s.fromTimeInbound;
                     if(s.toTimeInbound) els.timeInEnd.value = s.toTimeInbound;
-                    if (s.officeDays) els.officeDaysInputs.forEach(cb => cb.checked = s.officeDays.includes(cb.value));
-                } catch(e) {}
+                    
+                    if (s.officeDays) {
+                        els.officeDaysInputs.forEach(cb => cb.checked = s.officeDays.includes(cb.value));
+                    }
+                } catch(e) {
+                    console.error("Error loading settings", e);
+                }
             }
             syncReturnJourney();
             updateRouteLabels();
@@ -506,7 +510,13 @@
              toggleSettings(false); showStatus('Settings saved', 'success'); updateRouteLabels();
         }
         function syncReturnJourney() { els.inFrom.value = els.outTo.value; els.inFromCode.value = els.outToCode.value; els.inTo.value = els.outFrom.value; els.inToCode.value = els.outFromCode.value; }
-        function updateRouteLabels() { els.outRouteDisplay.textContent = `(${els.outFromCode.value} ➝ ${els.outToCode.value})`; els.inRouteDisplay.textContent = `(${els.inFromCode.value} ➝ ${els.inToCode.value})`; }
+        function updateRouteLabels() { 
+            // Only show codes if they exist
+            const outCode = els.outFromCode.value || '?';
+            const inCode = els.outToCode.value || '?';
+            els.outRouteDisplay.textContent = `(${outCode} ➝ ${inCode})`; 
+            els.inRouteDisplay.textContent = `(${inCode} ➝ ${outCode})`; 
+        }
         function toggleSettings(show) { if (show) { els.settingsOverlay.classList.remove('hidden'); els.settingsPanel.classList.remove('translate-x-full'); setTimeout(() => els.settingsOverlay.classList.remove('opacity-0'), 10); } else { els.settingsOverlay.classList.add('opacity-0'); els.settingsPanel.classList.add('translate-x-full'); setTimeout(() => els.settingsOverlay.classList.add('hidden'), 300); } }
 
         let lastResults = []; 
@@ -562,6 +572,15 @@
                 { type: "Outbound", from: els.outFromCode.value, to: els.outToCode.value, start: els.timeOutStart.value, end: els.timeOutEnd.value },
                 { type: "Inbound", from: els.inFromCode.value, to: els.inToCode.value, start: els.timeInStart.value, end: els.timeInEnd.value }
             ];
+
+            // Basic validation check after removing defaults
+            if (!journeys[0].from || !journeys[0].to) {
+                showStatus("Please select both Home and Work stations.", "error");
+                setLoading(false);
+                els.progressContainer.classList.add('hidden');
+                return;
+            }
+
 
             let allServices = [];
             let allRids = [];
@@ -777,7 +796,7 @@
                 const formattedSchDep = formatTime(s.schDep);
                 const formattedActArr = s.isCancelled ? 'Cancelled' : formatTime(s.actArr);
                 
-                // NEW: TOC Badge logic
+                // TOC Badge logic
                 let tocBadge = '';
                 if (s.toc) {
                     let tocClass = 'toc-default';
@@ -789,7 +808,7 @@
 
                 row.innerHTML = `
                     <td class="py-4 px-6 whitespace-nowrap text-sm text-slate-700" data-label="Date">${formatDateForDisplay(new Date(s.date))}</td>
-                    <td class="py-4 px-6 whitespace-nowrap text-sm text-slate-500" data-label="Type">${s.type}</td>
+                    <td class="py-4 px-6 whitespace-nowrap text-sm text-slate-500 flex items-center" data-label="Type">${s.type}</td>
                     <td class="py-4 px-6 whitespace-nowrap text-sm text-slate-500" data-label="TOC">${tocBadge}</td>
                     <td class="py-4 px-6 whitespace-nowrap text-sm text-slate-700 font-medium" data-label="Sch. Dep">${formattedSchDep}</td>
                     <td class="py-4 px-6 whitespace-nowrap text-sm font-medium ${s.isCancelled ? 'text-red-600' : 'text-slate-700'}" data-label="Act. Arr">${formattedActArr}</td>
