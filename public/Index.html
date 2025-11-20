@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rail Delay Finder - Claim Your Commute</title>
+    <meta name="description" content="Automated rail delay tracking and refund calculation for UK commuters.">
+    <link rel="icon" type="image/png" href="train_icon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+    <!-- Navigation -->
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <img src="train_icon.png" alt="Logo" class="h-8 w-8">
+            <span class="font-bold text-xl tracking-tight text-emerald-900">DelayRepay</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="/app" class="text-sm font-medium text-emerald-600 hover:text-emerald-700">Premium Login</a>
+            <a href="#signup" class="hidden sm:inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-emerald-600 hover:bg-emerald-700 transition-colors shadow-sm">
+                Get Started
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+        <div class="text-center space-y-8 max-w-3xl mx-auto">
+            <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-900">
+                Don't let delays <br class="hidden sm:block" />
+                <span class="text-emerald-600">cost you money.</span>
+            </h1>
+            <p class="text-lg sm:text-xl text-slate-600 leading-relaxed">
+                We monitor your daily commute and automatically calculate the compensation you are owed. 
+                Never miss a Delay Repay claim again.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                <a href="/app" class="w-full sm:w-auto px-8 py-4 text-base font-bold rounded-xl text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
+                    Launch Premium Dashboard
+                </a>
+                <a href="#features" class="w-full sm:w-auto px-8 py-4 text-base font-bold rounded-xl text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors">
+                    How it Works
+                </a>
+            </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div id="features" class="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12">
+            <!-- Feature 1 -->
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6 text-blue-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3">Automated Tracking</h3>
+                <p class="text-slate-600">We check every single train on your route against the official timetable.</p>
+            </div>
+            <!-- Feature 2 -->
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+                <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-6 text-emerald-600">
+                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3">Instant Calculations</h3>
+                <p class="text-slate-600">Know exactly how much you are owed based on your season ticket price.</p>
+            </div>
+            <!-- Feature 3 -->
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+                <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-6 text-purple-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3">Email Alerts</h3>
+                <p class="text-slate-600">Get notified instantly when your specific train is delayed or cancelled.</p>
+            </div>
+        </div>
+
+        <!-- Email Subscription Section -->
+        <div id="signup" class="mt-24 bg-slate-900 rounded-3xl p-8 sm:p-16 text-center text-white overflow-hidden relative">
+            <div class="relative z-10 max-w-2xl mx-auto">
+                <h2 class="text-3xl font-bold mb-4">Get Free Delay Alerts</h2>
+                <p class="text-slate-400 mb-8">Sign up to receive daily updates for a single route. Perfect for casual commuters.</p>
+                
+                <form class="flex flex-col sm:flex-row gap-3" onsubmit="event.preventDefault(); alert('Email signup coming soon!');">
+                    <input type="email" placeholder="Enter your email" class="flex-grow px-5 py-4 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                    <button type="submit" class="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 font-bold rounded-xl transition-colors">
+                        Subscribe
+                    </button>
+                </form>
+                <p class="text-xs text-slate-500 mt-4">No spam, unsubscribe anytime.</p>
+            </div>
+            
+            <!-- Decorative circles -->
+            <div class="absolute top-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+            <div class="absolute bottom-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 mt-24">
+        <div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+            <p class="text-center text-slate-400 text-sm">
+                &copy; 2025 Rail Delay Finder. Not affiliated with National Rail. <br>
+                Contains National Rail data © 2025. Source: Rail Delivery Group.
+            </p>
+        </div>
+    </footer>
+
+</body>
+</html>

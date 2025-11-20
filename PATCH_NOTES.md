@@ -1,16 +1,42 @@
 Patch Notes
 
-v1.5.3 - Compliance & Asset Fixes
+v1.6.0 - Membership Tiers & Splash Page
 
 Status: Ready for Deployment
 
+🚀 New Features
+
+Public Splash Page: Introduced a new index.html as the public landing page.
+
+Features a modern marketing design promoting the app's value proposition.
+
+Includes a mock email subscription form for future lead generation.
+
+Provides clear navigation to the Premium Dashboard.
+
+Premium Dashboard Route: Moved the main application tool to the /app route.
+
+This separates the public marketing face from the functional tool, paving the way for future authentication and user accounts.
+
+⚙️ Backend Updates
+
+Route Restructuring: Updated server.mjs to serve:
+
+GET / -> public/index.html (Splash Page)
+
+GET /app -> public/DelayRepayChecker.html (Premium App)
+
+v1.5.3 - Compliance & Asset Fixes
+
+Status: Implemented
+
 ⚖️ Legal & Compliance
 
-Data Attribution: Added a footer to the main application interface (DelayRepayChecker.html) explicitly acknowledging the use of National Rail data ("Source: Rail Delivery Group") and clarifying non-affiliation. This ensures compliance with open data license terms.
+Data Attribution: Added footer acknowledging National Rail data source.
 
 🎨 UI & Assets
 
-Icon Reference: Verified and corrected the train_icon.png reference in the application header to ensure the branding logo loads correctly across all devices.
+Icon Reference: Fixed train_icon.png pathing.
 
 v1.5.2 - Queue UX Refinements
 
@@ -18,13 +44,11 @@ Status: Implemented
 
 🖥️ Frontend Enhancements
 
-Visual Progress Bar: Replaced the generic spinner with a determinate progress bar during the search process.
+Visual Progress Bar: Added determinate progress bar for search jobs.
 
-Persistent Search Sessions: Improved "Resume on Refresh" capability using localStorage.
+Persistent Search Sessions: Jobs resume automatically after page refresh.
 
-Distinct Data Badges: Added clear visual indicators (Blue "Cached Data" vs. Green "Live Data").
-
-Improved Status Messages: Granular feedback text (e.g., "Analyzing 5/10 trains...").
+Distinct Data Badges: Added "Cached" vs. "Live" data indicators.
 
 v1.5.1 - Queue Cache Optimization
 
@@ -32,9 +56,7 @@ Status: Implemented
 
 ⚡ Performance
 
-Pre-Queue Cache Check: Updated server.mjs to check Redis cache before adding a job to the queue.
-
-Worker Persistence: Worker explicitly saves successful API results to Redis for future instant access.
+Pre-Queue Cache Check: Server checks Redis cache before queuing jobs to provide instant results.
 
 v1.5.0 - Asynchronous Queuing System
 
@@ -42,13 +64,7 @@ Status: Implemented
 
 ⚡ Architecture Update
 
-Asynchronous Job Queue: Integrated BullMQ with Redis to manage search requests and eliminate rate limit errors.
-
-Shared Benefits: Queue system leverages existing Redis cache.
-
-🖥️ Frontend Updates
-
-Polling Logic: Updated frontend to handle async workflow (Submit -> Get ID -> Poll -> Result).
+Asynchronous Job Queue: Integrated BullMQ with Redis to manage search requests.
 
 v1.4.0 - Performance Optimization & Cleanup
 
@@ -56,13 +72,11 @@ Status: Implemented
 
 ⚡ Performance (Caching Strategy)
 
-Server-Side Caching: Implemented caching layer in server.mjs using ioredis (Redis/Upstash).
-
-Logic: Caches historic data to reduce API calls.
+Server-Side Caching: Implemented Redis caching for historic data.
 
 🧹 Codebase Cleanup
 
-Removed Background Worker: Deleted standalone delay_checker.mjs.
+Removed Background Worker: Deleted standalone script.
 
 v1.3.0 - Security & Data Optimization
 
@@ -70,13 +84,9 @@ Status: Implemented
 
 🔒 Security & Infrastructure
 
-Environment Security: Secured API keys.
+Environment Security: Removed hardcoded keys.
 
-Git Hygiene: Cleaned up repo and ignored secrets.
-
-💾 Data Management
-
-Dynamic Station Data: Switched to dynamic stations.json.
+Git Hygiene: Added .gitignore rules.
 
 v1.2.0 - Full Stack Architecture
 
@@ -84,7 +94,7 @@ Status: Implemented
 
 🚀 Architecture
 
-Express.js Proxy Server: Added server.mjs backend.
+Express.js Proxy Server: Added server.mjs.
 
 v1.0.0 - Initial Mobile Release
 

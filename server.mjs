@@ -74,7 +74,6 @@ const worker = new Worker('rail-search-queue', async (job) => {
         const data = await response.json();
         
         // Save to Redis Cache (Custom Persistence)
-        // We do this here so future requests skip the queue!
         if (type === 'details' || (type === 'metrics' && isDateInPast(payload.from_date))) {
              const stringData = JSON.stringify(data);
              await connection.set(cacheKey, stringData); 
@@ -99,11 +98,11 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve static files BUT we will handle index.html and DelayRepayChecker.html manually via routes
+app.use(express.static(path.join(__dirname, 'public'), { index: false })); 
 
-// --- API Endpoints ---
+// --- API Endpoints (Same as before) ---
 
-// Generic handler to check cache first
 async function handleRequest(type, payload, res) {
     const cacheKey = getCacheKey(type, payload);
 
@@ -112,11 +111,6 @@ async function handleRequest(type, payload, res) {
         const cachedRaw = await connection.get(cacheKey);
         if (cachedRaw) {
             console.log(`⚡ Cache Hit: Skipping queue for ${type}`);
-            const cachedData = JSON.parse(cachedRaw);
-            // We return a "fake" completed job structure so frontend polling works instantly
-            // Or better: we return a special status that tells frontend "It's done!"
-            // But to keep frontend simple (it expects a jobId to poll), 
-            // let's return a jobId of "cached_<key>" and handle that in the /job/:id endpoint.
             return res.json({ jobId: `cached:${cacheKey}`, status: 'completed' });
         }
     } catch (e) {
@@ -142,17 +136,14 @@ app.post('/api/servicedetails', async (req, res) => {
     await handleRequest('details', req.body, res);
 });
 
-// 3. Job Status Endpoint (Polling)
 app.get('/api/job/:id', async (req, res) => {
     const jobId = req.params.id;
 
-    // Special handling for instant cache hits
     if (jobId.startsWith('cached:')) {
         const cacheKey = jobId.split('cached:')[1];
         const cachedRaw = await connection.get(cacheKey);
         if (cachedRaw) {
              const data = JSON.parse(cachedRaw);
-             // Inject flag so frontend shows blue badge
              return res.json({ status: 'completed', data: { ...data, _fromCache: true } });
         } else {
             return res.status(404).json({ error: 'Cache expired' });
@@ -178,19 +169,28 @@ app.get('/api/job/:id', async (req, res) => {
     }
 });
 
+// --- Routes ---
+
+// 1. Splash Page (Root)
 app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// 2. Premium App (Dashboard)
+app.get('/app', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'DelayRepayChecker.html'));
 });
 
+// --- Start Server ---
 if (IS_PRODUCTION) {
     http.createServer(app).listen(PORT, () => {
-        console.log(`🚀 Production server (Queue+Cache) running on port ${PORT}`);
+        console.log(`🚀 Production server running on port ${PORT}`);
     });
 } else {
     try {
         const httpsOptions = { key: fs.readFileSync('key.pem'), cert: fs.readFileSync('cert.pem') };
         https.createServer(httpsOptions, app).listen(PORT, () => {
-            console.log(`🔒 Local server (Queue+Cache) running on https://localhost:${PORT}`);
+            console.log(`🔒 Local server running on https://localhost:${PORT}`);
         });
     } catch (e) {
         console.warn("⚠️ SSL keys not found. Falling back to HTTP.");
