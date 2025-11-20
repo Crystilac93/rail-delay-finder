@@ -870,10 +870,6 @@
                 try {
                     const s = JSON.parse(stored);
                     if (s.ticketPrice) els.priceInput.value = s.ticketPrice;
-                    if (s.outFromCode) els.outFromCode.value = s.outFromCode;
-                    if (s.outToCode) els.outToCode.value = s.outToCode;
-                    if (s.outFromDisplay) els.outFrom.value = s.outFromDisplay;
-                    if (s.outToDisplay) els.outTo.value = s.outToDisplay;
                     if (s.fromTimeOutbound) els.timeOutStart.value = s.fromTimeOutbound;
                     if (s.toTimeOutbound) els.timeOutEnd.value = s.toTimeOutbound;
                     if (s.fromTimeInbound) els.timeInStart.value = s.fromTimeInbound;
@@ -886,20 +882,16 @@
                     console.error("Error loading settings", e);
                 }
             }
-            syncReturnJourney();
-            updateRouteLabels();
         }
 
         function saveSettings() {
             const days = Array.from(els.officeDaysInputs).filter(c => c.checked).map(c => c.value);
-            const s = { ticketPrice: els.priceInput.value, outFromCode: els.outFromCode.value, outToCode: els.outToCode.value, outFromDisplay: els.outFrom.value, outToDisplay: els.outTo.value, fromTimeOutbound: els.timeOutStart.value, toTimeOutbound: els.timeOutEnd.value, fromTimeInbound: els.timeInStart.value, toTimeInbound: els.timeInEnd.value, officeDays: days };
+            const s = { ticketPrice: els.priceInput.value, fromTimeOutbound: els.timeOutStart.value, toTimeOutbound: els.timeOutEnd.value, fromTimeInbound: els.timeInStart.value, toTimeInbound: els.timeInEnd.value, officeDays: days };
             localStorage.setItem('railDelaySettings', JSON.stringify(s));
-            toggleSettings(false); showStatus('Settings saved', 'success'); updateRouteLabels();
+            toggleSettings(false); showStatus('Settings saved', 'success');
         }
         function syncReturnJourney() { els.inFrom.value = els.outTo.value; els.inFromCode.value = els.outToCode.value; els.inTo.value = els.outFrom.value; els.inToCode.value = els.outFromCode.value; }
         function updateRouteLabels() {
-            const outCode = els.outFromCode.value || '?';
-            const inCode = els.outToCode.value || '?';
             if (els.outRouteDisplay) els.outRouteDisplay.textContent = '';
             if (els.inRouteDisplay) els.inRouteDisplay.textContent = '';
         }
