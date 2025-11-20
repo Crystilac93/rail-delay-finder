@@ -16,14 +16,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        /* --- Core Defaults --- */
+        /* ... (Styles same as before) ... */
         html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; overscroll-behavior-y: none; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
-        /* Mobile Card View for Tables */
         @media (max-width: 768px) {
             .mobile-table-card thead { display: none; }
             .mobile-table-card tbody tr { display: flex; flex-direction: column; background: white; border: 1px solid #e5e7eb; border-radius: 0.75rem; margin-bottom: 1rem; padding: 1rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
@@ -32,36 +31,29 @@
             .mobile-table-card td:last-child { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #f3f4f6; font-weight: 700; font-size: 1.1rem; }
         }
 
-        /* Progress Bar Styles */
         .progress-container { width: 100%; background-color: #e5e7eb; border-radius: 9999px; height: 0.5rem; overflow: hidden; margin-top: 0.75rem; }
         .progress-bar { height: 100%; background-color: #10b981; width: 0%; transition: width 0.3s ease-out; }
-
         .text-danger { color: #ef4444; font-weight: 600; }
         .text-success { color: #22c55e; font-weight: 600; }
         
         input[type="time"], input[type="date"], select { -webkit-appearance: none; appearance: none; background-color: #fff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.6rem 0.875rem; font-size: 1rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
         input:focus { outline: none; border-color: #10b981; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); }
-
         #settings-panel { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .toggle-checkbox:checked { right: 0; border-color: #10b981; }
         .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
         .kpi-card { transition: transform 0.2s; }
         .kpi-card:active { transform: scale(0.98); }
-
         .kpi-scroller { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; }
         @media (max-width: 640px) {
             .kpi-scroller { display: flex; overflow-x: auto; padding-bottom: 1rem; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; margin-right: -1rem; padding-right: 1rem; }
             .kpi-scroller > * { flex: 0 0 140px; scroll-snap-align: start; }
         }
-        
         .autocomplete-results { max-height: 200px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-
-        /* Cache/Live Badges */
         .cache-badge { display: inline-flex; align-items: center; background-color: #dbeafe; color: #1e40af; padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; border: 1px solid #bfdbfe; }
         .api-badge { display: inline-flex; align-items: center; background-color: #dcfce7; color: #166534; padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; border: 1px solid #bbf7d0; }
         
         /* TOC Badges */
-        .toc-badge { padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: white; }
+        .toc-badge { padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: white; display: inline-block; min-width: 2.5rem; text-align: center; }
         .toc-gw { background-color: #0a4c3f; } /* GWR Dark Green */
         .toc-sw { background-color: #0193d7; } /* SWR Blue */
         .toc-vt { background-color: #b50e24; } /* Virgin/Avanti Red */
@@ -69,8 +61,7 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50">
-
-    <!-- Navbar -->
+    <!-- ... (Navbar and Settings Panel same as before) ... -->
     <nav class="bg-white shadow-sm sticky top-0 z-30 safe-area-top border-b border-slate-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
@@ -117,50 +108,7 @@
                  </div>
              </div>
 
-             <!-- Journey Settings -->
-             <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-6">
-                 <div class="flex items-center mb-2">
-                     <div class="p-2 bg-blue-100 rounded-lg mr-3 text-blue-600">
-                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
-                     </div>
-                     <h3 class="font-bold text-slate-900">Route Configuration</h3>
-                 </div>
-                 
-                 <div class="space-y-5">
-                     <div class="autocomplete-container relative">
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Home Station</label>
-                        <!-- REMOVED DEFAULT VALUES -->
-                        <input type="text" id="setting-outbound-from" class="w-full rounded-xl border-slate-200 py-3 text-sm font-medium focus:ring-emerald-500 focus:border-emerald-500" placeholder="Start Station (e.g. Didcot Parkway)">
-                        <div class="autocomplete-results hidden absolute w-full bg-white border border-slate-200 rounded-b-xl shadow-xl z-50" id="results-setting-outbound-from"></div>
-                        <input type="hidden" id="setting-outbound-from-code" value=""> 
-                    </div>
-                     <div class="autocomplete-container relative">
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Work Station</label>
-                        <!-- REMOVED DEFAULT VALUES -->
-                        <input type="text" id="setting-outbound-to" class="w-full rounded-xl border-slate-200 py-3 text-sm font-medium focus:ring-emerald-500 focus:border-emerald-500" placeholder="End Station (e.g. London Paddington)">
-                        <div class="autocomplete-results hidden absolute w-full bg-white border border-slate-200 rounded-b-xl shadow-xl z-50" id="results-setting-outbound-to"></div>
-                        <input type="hidden" id="setting-outbound-to-code" value="">
-                     </div>
-                 </div>
-                 
-                 <div class="relative py-2">
-                    <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-slate-100"></div></div>
-                    <div class="relative flex justify-center"><span class="bg-white px-3 text-xs font-medium text-slate-400">Return Journey (Auto-filled)</span></div>
-                 </div>
-
-                 <div class="space-y-5 opacity-60 pointer-events-none select-none">
-                     <div class="autocomplete-container relative">
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Return From (Work)</label>
-                        <input type="text" id="setting-inbound-from" class="w-full rounded-xl border-slate-200 py-3 text-sm bg-slate-50" readonly>
-                        <input type="hidden" id="setting-inbound-from-code" value="">
-                     </div>
-                     <div class="autocomplete-container relative">
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Return To (Home)</label>
-                        <input type="text" id="setting-inbound-to" class="w-full rounded-xl border-slate-200 py-3 text-sm bg-slate-50" readonly>
-                        <input type="hidden" id="setting-inbound-to-code" value="">
-                     </div>
-                 </div>
-             </div>
+             <!-- Journey Settings (Fields moved to main page, but kept structure for any future settings) -->
         </div>
         
         <div class="flex-none p-6 border-t border-slate-100 bg-slate-50 safe-area-bottom">
@@ -173,7 +121,6 @@
         
         <!-- Search Card -->
         <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-             <!-- (Form Content) -->
              <div class="p-6 sm:p-8 bg-white border-b border-slate-100">
                 <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Find Delays</h1>
                 <p class="text-slate-500 text-sm mt-1 font-medium">Analyse your commute for compensation.</p>
@@ -186,12 +133,14 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div class="autocomplete-container relative">
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Home Station</label>
+                            <!-- No defaults -->
                             <input type="text" id="setting-outbound-from" class="w-full rounded-xl border-slate-200 py-3 text-sm font-semibold text-slate-700 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. Didcot Parkway">
                             <div class="autocomplete-results hidden absolute w-full bg-white border border-slate-200 rounded-b-xl shadow-xl z-50" id="results-setting-outbound-from"></div>
                             <input type="hidden" id="setting-outbound-from-code" value=""> 
                         </div>
                         <div class="autocomplete-container relative">
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Work Station</label>
+                            <!-- No defaults -->
                             <input type="text" id="setting-outbound-to" class="w-full rounded-xl border-slate-200 py-3 text-sm font-semibold text-slate-700 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. London Paddington">
                             <div class="autocomplete-results hidden absolute w-full bg-white border border-slate-200 rounded-b-xl shadow-xl z-50" id="results-setting-outbound-to"></div>
                             <input type="hidden" id="setting-outbound-to-code" value="">
@@ -209,6 +158,7 @@
 
                 <!-- Search Type & Date -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <!-- ... (Mode & Date selection same as before) ... -->
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Mode</label>
                         <div class="flex bg-slate-100 p-1.5 rounded-xl">
@@ -232,7 +182,8 @@
                     </div>
                 </div>
 
-                <!-- Days in Office (Collapsible) -->
+                <!-- Days in Office -->
+                <!-- ... (Days inputs same as before) ... -->
                 <div id="days-in-office-group">
                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Days Travelled</label>
                     <div class="flex justify-between gap-2 sm:gap-4">
@@ -371,6 +322,7 @@
                             <tr>
                                 <th class="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
                                 <th class="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Type</th>
+                                <th class="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">TOC</th> <!-- NEW COLUMN -->
                                 <th class="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Sch. Dep</th>
                                 <th class="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Act. Arr</th>
                                 <th class="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Delay</th>
@@ -399,7 +351,7 @@
     <script src="station_data.js"></script>
     
     <script>
-        // ... (Keep all existing script logic identically, including autocomplete, polling etc.) ...
+        // ... (Constants and Dom Elements) ...
         const els = {
             form: document.getElementById('search-form'),
             btn: document.getElementById('submit-button'),
@@ -530,7 +482,7 @@
                     els.priceInput.value = s.ticketPrice || '7437.92';
                     
                     // Only set values if they exist in storage. 
-                    // Do NOT provide 'Didcot Parkway' as a fallback anymore.
+                    // Do NOT provide defaults here anymore.
                     if (s.outFromCode) els.outFromCode.value = s.outFromCode;
                     if (s.outToCode) els.outToCode.value = s.outToCode;
                     if (s.outFromDisplay) els.outFrom.value = s.outFromDisplay;
@@ -540,13 +492,8 @@
                     if(s.toTimeOutbound) els.timeOutEnd.value = s.toTimeOutbound;
                     if(s.fromTimeInbound) els.timeInStart.value = s.fromTimeInbound;
                     if(s.toTimeInbound) els.timeInEnd.value = s.toTimeInbound;
-                    
-                    if (s.officeDays) {
-                        els.officeDaysInputs.forEach(cb => cb.checked = s.officeDays.includes(cb.value));
-                    }
-                } catch(e) {
-                    console.error("Error loading settings", e);
-                }
+                    if (s.officeDays) els.officeDaysInputs.forEach(cb => cb.checked = s.officeDays.includes(cb.value));
+                } catch(e) {}
             }
             syncReturnJourney();
             updateRouteLabels();
@@ -762,8 +709,6 @@
             let counts = { cancel: 0, sev: 0, maj: 0, med: 0, min: 0 };
             
             // --- New Calculation Logic: Maximum Refund per Leg ---
-            // Group services by date AND direction (type)
-            // Structure: { "2023-11-14_Outbound": maxRefund, "2023-11-14_Inbound": maxRefund }
             let maxRefunds = {}; 
 
             services.forEach(s => {
@@ -844,7 +789,8 @@
 
                 row.innerHTML = `
                     <td class="py-4 px-6 whitespace-nowrap text-sm text-slate-700" data-label="Date">${formatDateForDisplay(new Date(s.date))}</td>
-                    <td class="py-4 px-6 whitespace-nowrap text-sm text-slate-500 flex items-center" data-label="Type">${s.type} ${tocBadge}</td>
+                    <td class="py-4 px-6 whitespace-nowrap text-sm text-slate-500" data-label="Type">${s.type}</td>
+                    <td class="py-4 px-6 whitespace-nowrap text-sm text-slate-500" data-label="TOC">${tocBadge}</td>
                     <td class="py-4 px-6 whitespace-nowrap text-sm text-slate-700 font-medium" data-label="Sch. Dep">${formattedSchDep}</td>
                     <td class="py-4 px-6 whitespace-nowrap text-sm font-medium ${s.isCancelled ? 'text-red-600' : 'text-slate-700'}" data-label="Act. Arr">${formattedActArr}</td>
                     <td class="py-4 px-6 whitespace-nowrap text-sm ${statusClass}" data-label="Delay">${statusText}</td>
