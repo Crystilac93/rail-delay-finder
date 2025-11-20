@@ -28,12 +28,18 @@
         .autocomplete-item { padding: 0.5rem 1rem; cursor: pointer; }
         .autocomplete-item:hover { background-color: #ecfdf5; color: #059669; }
         .autocomplete-item strong { font-weight: 600; }
+        
+        .fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 overflow-x-hidden flex flex-col min-h-screen">
 
     <!-- Navigation -->
-    <nav class="bg-white shadow-sm border-b border-slate-200 z-30">
+    <nav class="bg-white/80 backdrop-blur-md shadow-sm border-b border-slate-200 fixed w-full z-40">
         <div class="max-w-7xl mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
             <!-- Logo returns to Splash -->
             <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
@@ -43,39 +49,142 @@
             
             <!-- Nav Links -->
             <div class="flex items-center gap-4 sm:gap-8">
-                <a href="/app" class="text-sm font-bold text-slate-600 hover:text-emerald-600 transition-colors">Search Dashboard</a>
-                <a href="/manage" class="text-sm font-bold text-slate-600 hover:text-emerald-600 transition-colors">Manage Alerts</a>
+                <a href="/app" class="text-sm font-bold text-slate-600 hover:text-emerald-600 transition-colors">Dashboard</a>
+                <a href="/manage" class="hidden sm:block text-sm font-bold text-slate-600 hover:text-emerald-600 transition-colors">Alerts</a>
+                <a href="/app" class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-bold rounded-xl text-white bg-slate-900 hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 transform hover:-translate-y-0.5">
+                    Sign In
+                </a>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <main class="flex-grow relative max-w-7xl mx-auto px-6 lg:px-8 pt-20 pb-32 sm:pt-32 text-center">
-        <div class="blob bg-emerald-200 w-96 h-96 rounded-full top-0 left-1/4 -translate-x-1/2 mix-blend-multiply animate-blob"></div>
-        <div class="blob bg-blue-200 w-96 h-96 rounded-full top-0 right-1/4 translate-x-1/2 mix-blend-multiply animate-blob animation-delay-2000"></div>
+    <main class="flex-grow relative pt-32 pb-20 sm:pt-40 sm:pb-24 px-6">
+        <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+            
+            <!-- Hero Text -->
+            <div class="text-center lg:text-left fade-in-up">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-6">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Live Delay Tracking
+                </div>
+                <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 mb-6 leading-[1.1]">
+                    Delays happen. <br />
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">Don't pay for them.</span>
+                </h1>
+                <p class="text-lg sm:text-xl text-slate-600 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                    The average UK commuter loses <strong>£140/year</strong> in unclaimed compensation. 
+                    We automatically track your journey and calculate exactly what you're owed.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start text-sm font-bold text-slate-500">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        Automated Claims
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        Daily Alerts
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        National Rail Data
+                    </div>
+                </div>
+            </div>
 
-        <h1 class="text-5xl sm:text-7xl font-extrabold tracking-tight text-slate-900 mb-8 leading-tight">
-            Don't let delays <br class="hidden sm:block" />
-            <span class="text-emerald-600">cost you money.</span>
-        </h1>
-        
-        <p class="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto mb-12 leading-relaxed">
-            The average UK commuter loses £140/year in unclaimed delay compensation. 
-            We monitor your journey and tell you exactly what you're owed.
-        </p>
-        
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="#signup" class="w-full sm:w-auto px-8 py-4 text-lg font-bold rounded-2xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-xl shadow-emerald-200 hover:shadow-2xl transition-all transform hover:-translate-y-1">
-                Get Free Alerts
-            </a>
-            <a href="/app" class="w-full sm:w-auto px-8 py-4 text-lg font-bold rounded-2xl text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all">
-                One-Off Check
-            </a>
+            <!-- Interactive Estimator Card -->
+            <div class="relative fade-in-up" style="animation-delay: 0.2s;">
+                <div class="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-3xl blur opacity-30 animate-pulse"></div>
+                <div class="relative bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 sm:p-8">
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold text-slate-900">Refund Estimator</h3>
+                        <p class="text-slate-500 text-sm">Calculate your potential annual refund based on national route averages.</p>
+                    </div>
+
+                    <form id="estimator-form" class="space-y-4">
+                        <div class="relative">
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Home Station</label>
+                            <input type="text" id="est-from" placeholder="e.g. Brighton" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-bold text-slate-900" required autocomplete="off">
+                            <input type="hidden" id="est-from-code">
+                            <div id="results-est-from" class="autocomplete-results hidden"></div>
+                        </div>
+
+                        <div class="relative">
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Work Station</label>
+                            <input type="text" id="est-to" placeholder="e.g. London Victoria" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-bold text-slate-900" required autocomplete="off">
+                            <input type="hidden" id="est-to-code">
+                            <div id="results-est-to" class="autocomplete-results hidden"></div>
+                        </div>
+
+                        <button type="submit" id="est-btn" class="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-lg shadow-slate-200 transition-all transform active:scale-[0.98] flex items-center justify-center">
+                            <span>Estimate Refund</span>
+                        </button>
+                    </form>
+
+                    <!-- Result State -->
+                    <div id="est-result" class="hidden mt-6 pt-6 border-t border-slate-100 text-center">
+                        <div id="est-content">
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Potential Annual Claim</p>
+                            <div class="text-5xl font-extrabold text-emerald-600 mb-2" id="est-amount">£0.00</div>
+                            <p class="text-sm text-slate-600 mb-4 max-w-xs mx-auto">Based on <span id="est-miles" class="font-bold text-slate-800">0</span> mile route & standard UK performance metrics.</p>
+                            
+                            <div class="grid grid-cols-2 gap-2 mb-6 text-xs font-medium text-slate-500">
+                                <div class="bg-slate-50 rounded-lg p-2 border border-slate-100">
+                                    <span class="block text-slate-900 font-bold text-lg" id="est-delays">0</span>
+                                    Est. Major Delays
+                                </div>
+                                <div class="bg-slate-50 rounded-lg p-2 border border-slate-100">
+                                    <span class="block text-slate-900 font-bold text-lg" id="est-cancels">0</span>
+                                    Est. Cancellations
+                                </div>
+                            </div>
+
+                            <a href="/app" class="block w-full py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-500 shadow-lg shadow-emerald-200 transition-all">
+                                Start Tracking For Real &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
-    <!-- Email Subscription Section -->
-    <section id="signup" class="py-24">
+    <!-- Features Section -->
+    <section class="py-24 bg-white border-t border-slate-100">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-extrabold text-slate-900 sm:text-4xl">How RefundMyRail Works</h2>
+                <p class="mt-4 text-lg text-slate-500">We do the boring admin so you get the money you're owed.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-12">
+                <!-- Step 1 -->
+                <div class="relative pl-4 border-l-4 border-emerald-100 hover:border-emerald-500 transition-colors duration-300">
+                    <div class="text-emerald-600 font-bold text-lg mb-2">01. Set Your Route</div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Tell us your commute</h3>
+                    <p class="text-slate-500">Enter your home and work stations and your usual travel times. We handle returns and flexible hours.</p>
+                </div>
+                
+                <!-- Step 2 -->
+                <div class="relative pl-4 border-l-4 border-emerald-100 hover:border-emerald-500 transition-colors duration-300">
+                    <div class="text-emerald-600 font-bold text-lg mb-2">02. We Monitor</div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Real-time Tracking</h3>
+                    <p class="text-slate-500">Our system checks every train against the official timetable data. We spot cancellations and delays instantly.</p>
+                </div>
+                
+                <!-- Step 3 -->
+                <div class="relative pl-4 border-l-4 border-emerald-100 hover:border-emerald-500 transition-colors duration-300">
+                    <div class="text-emerald-600 font-bold text-lg mb-2">03. Get Paid</div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Instant Alerts</h3>
+                    <p class="text-slate-500">When you are owed a refund, we email you the exact details you need to file a claim in seconds.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Subscription Section (Restored) -->
+    <section id="signup" class="py-24 bg-slate-50 border-t border-slate-200">
         <div class="max-w-4xl mx-auto px-6 lg:px-8">
             <div class="bg-slate-900 rounded-3xl p-8 sm:p-16 text-center text-white overflow-hidden relative isolate">
                 <div class="relative z-10">
@@ -153,7 +262,7 @@
     </section>
 
     <!-- Standardized Footer -->
-    <footer class="bg-white border-t border-slate-200 py-12 mt-auto">
+    <footer class="bg-white border-t border-slate-200 py-12">
         <div class="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
             <div class="flex items-center gap-2 opacity-50">
                 <img src="train_icon.png" alt="Logo" class="h-6 w-6 grayscale">
@@ -168,14 +277,22 @@
     </footer>
 
     <!-- Scripts -->
+    <script src="config.js"></script>
     <script src="station_data.js"></script>
     <script>
+        // --- Global Data ---
+        let stations = []; // Will hold the full object from station_data
+
+        // --- Autocomplete Logic ---
         function setupAutocomplete(input, results, codeInput) {
             input.addEventListener('input', function() {
                 const val = this.value.toLowerCase();
                 results.innerHTML = '';
                 if (val.length < 2) { results.classList.add('hidden'); return; }
+                
+                // Filter from global stationData
                 const matches = stationData.filter(s => s.name.toLowerCase().includes(val) || s.code.toLowerCase().includes(val)).slice(0,5);
+                
                 if (matches.length > 0) {
                     results.classList.remove('hidden');
                     matches.forEach(s => {
@@ -184,24 +301,144 @@
                         div.innerHTML = `<strong>${s.name}</strong> <span class="text-slate-400 text-xs ml-1">[${s.code}]</span>`;
                         div.addEventListener('click', () => {
                             input.value = s.name;
-                            codeInput.value = s.code;
+                            codeInput.value = s.code; // Save code
                             results.classList.add('hidden');
                         });
                         results.appendChild(div);
                     });
                 } else { results.classList.add('hidden'); }
             });
-            document.addEventListener('click', (e) => { if (!input.contains(e.target) && !results.contains(e.target)) results.classList.add('hidden'); });
+            
+            // Close on click outside
+            document.addEventListener('click', (e) => { 
+                if (!input.contains(e.target) && !results.contains(e.target)) results.classList.add('hidden'); 
+            });
         }
 
-        const checkStations = setInterval(() => {
+        // --- Load Rich Data for Distance Calc ---
+        let fullStationList = [];
+        
+        // Fallback geometry for demo purposes if fetch fails (e.g. in preview blob)
+        const FALLBACK_GEOMETRY = [
+            { crsCode: 'BTN', lat: 50.829659, long: -0.141234 }, // Brighton
+            { crsCode: 'VIC', lat: 51.4966, long: -0.1448 },     // Victoria
+            { crsCode: 'LBG', lat: 51.505035, long: -0.085058 }, // London Bridge
+            { crsCode: 'STP', lat: 51.531921, long: -0.126361 }, // St Pancras
+            { crsCode: 'KGX', lat: 51.530827, long: -0.122907 }, // Kings Cross
+            { crsCode: 'EUS', lat: 51.528313, long: -0.134545 }, // Euston
+            { crsCode: 'PAD', lat: 51.516014, long: -0.176049 }, // Paddington
+            { crsCode: 'WAT', lat: 51.501865, long: -0.111126 }, // Waterloo
+            { crsCode: 'LIV', lat: 53.407299, long: -2.977746 }, // Liverpool Lime St
+            { crsCode: 'MAN', lat: 53.476704, long: -2.228991 }, // Manchester Picc
+            { crsCode: 'EDB', lat: 55.952442, long: -3.188236 }, // Edinburgh
+            { crsCode: 'GLC', lat: 55.860157, long: -4.259208 }, // Glasgow Central
+            { crsCode: 'BHM', lat: 52.478153, long: -1.898375 }  // Birmingham New St
+        ];
+
+        async function loadRichStationData() {
+            try {
+                // Fetch the raw JSON which has lat/long
+                const res = await fetch('stations.json');
+                if (!res.ok) throw new Error("File not found");
+                fullStationList = await res.json();
+            } catch(e) {
+                console.warn("Station geometry fetch failed (likely preview environment). Using fallback data.");
+                fullStationList = [];
+            } finally {
+                // Always init forms, even if fetch fails
+                initForms();
+            }
+        }
+
+        function initForms() {
             if (typeof stationData !== 'undefined' && stationData.length > 0) {
-                clearInterval(checkStations);
+                // Estimator Forms
+                setupAutocomplete(document.getElementById('est-from'), document.getElementById('results-est-from'), document.getElementById('est-from-code'));
+                setupAutocomplete(document.getElementById('est-to'), document.getElementById('results-est-to'), document.getElementById('est-to-code'));
+                // Subscription Forms
                 setupAutocomplete(document.getElementById('sub-from'), document.getElementById('results-sub-from'), document.getElementById('sub-from-code'));
                 setupAutocomplete(document.getElementById('sub-to'), document.getElementById('results-sub-to'), document.getElementById('sub-to-code'));
+            } else {
+                setTimeout(initForms, 100);
             }
-        }, 100);
+        }
+        
+        loadRichStationData();
 
+        // --- Calculation Logic (No API) ---
+        
+        // Haversine Formula for Distance (Miles)
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 3958.8; // Radius of Earth in miles
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function getCoords(crsCode) {
+            let st = fullStationList.find(s => s.crsCode === crsCode);
+            if (!st) {
+                st = FALLBACK_GEOMETRY.find(s => s.crsCode === crsCode);
+            }
+            return st ? { lat: st.lat, long: st.long } : null;
+        }
+
+        // Statistical Estimator
+        document.getElementById('estimator-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const fromCode = document.getElementById('est-from-code').value;
+            const toCode = document.getElementById('est-to-code').value;
+
+            if(!fromCode || !toCode) return;
+
+            const fromLoc = getCoords(fromCode);
+            const toLoc = getCoords(toCode);
+            
+            // Fallback if coords missing (unlikely with full list)
+            if(!fromLoc || !toLoc) {
+                 document.getElementById('est-amount').textContent = "£120.00+"; 
+                 document.getElementById('est-detail').textContent = "Estimated based on average commuter routes.";
+                 document.getElementById('est-result').classList.remove('hidden');
+                 return;
+            }
+
+            const distance = getDistance(fromLoc.lat, fromLoc.long, toLoc.lat, toLoc.long);
+            const roundedDist = Math.round(distance);
+
+            // --- The Estimation "Algorithm" ---
+            const estTicketPrice = Math.max(1000, distance * 460 * 0.35); // Floor at £1000
+            const pricePerJourney = estTicketPrice / 460;
+
+            let failRate = 0.02;
+            if(distance > 60) failRate = 0.06;
+            else if(distance > 20) failRate = 0.04;
+
+            const annualFailures = Math.round(460 * failRate);
+            const majorIncidents = Math.ceil(annualFailures * 0.2);
+            const delayIncidents = annualFailures - majorIncidents;
+
+            const totalRefund = (majorIncidents * (pricePerJourney * 0.5)) + (delayIncidents * (pricePerJourney * 0.25));
+            
+            // Display
+            document.getElementById('est-amount').textContent = `£${totalRefund.toFixed(2)}`;
+            document.getElementById('est-miles').textContent = roundedDist;
+            document.getElementById('est-delays').textContent = delayIncidents;
+            document.getElementById('est-cancels').textContent = majorIncidents;
+            
+            document.getElementById('est-result').classList.remove('hidden');
+            
+            // Scroll to result
+            setTimeout(() => {
+                document.getElementById('est-result').scrollIntoView({behavior: 'smooth', block: 'nearest'});
+            }, 100);
+        });
+
+        // --- Subscription Logic ---
         document.getElementById('subscription-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('sub-btn');
@@ -247,6 +484,7 @@
                 btn.textContent = "Subscribe for Free";
             }
         });
+
     </script>
 </body>
 </html>

@@ -1,8 +1,24 @@
 Patch Notes
 
-v1.7.2 - UI Standardization & Layout Fixes
+v1.8.0 - Marketing Overhaul & Refund Estimator
 
 Status: Ready for Deployment
+
+🚀 New Feature: Instant Refund Estimator
+
+Interactive Hero Tool: Replaced static buttons on the splash page with a dynamic calculator.
+Statistical Engine: Estimates potential annual refunds instantly using station geolocation (Haversine formula) and national performance heuristics, removing the need for slow API calls on the landing page.
+Smart Fallback: Includes embedded geometry data for major UK stations to ensure the tool works immediately, even before the full station database loads.
+
+🎨 UI & Layout Refinements
+
+Desktop Optimization: Increased the Dashboard container width (max-w-5xl) to provide breathing room for data tables on larger screens, while maintaining the card layout for mobile.
+Conversion Flow: Moved the email subscription form to a dedicated "Call to Action" section at the bottom of the landing page.
+Visual Polish: Added "How it Works" section with iconography to build user trust before sign-up.
+
+v1.7.2 - UI Standardization & Layout Fixes
+
+Status: Deployed
 
 🖥️ Dashboard UX & Fixes
 
