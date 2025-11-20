@@ -329,7 +329,7 @@
                             <tr>
                                 <th class="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
                                 <th class="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Type</th>
-                                <th class="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">TOC</th>
+                                <th class="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Rail Operator</th>
                                 <th class="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Sch. Dep</th>
                                 <th class="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Act. Arr</th>
                                 <th class="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Delay</th>
@@ -345,18 +345,10 @@
 
     </main>
 
-    <!-- Standardized Footer -->
-    <footer class="bg-white border-t border-slate-200 py-12 mt-auto">
-        <div class="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div class="flex items-center gap-2 opacity-50">
-                <img src="train_icon.png" alt="Logo" class="h-6 w-6 grayscale">
-                <span class="font-bold text-slate-900">RefundMyRail</span>
-            </div>
-            <div class="text-slate-400 text-sm text-center md:text-right space-y-1">
-                <p>&copy; 2025 RefundMyRail.</p>
-                <p>Contains National Rail data © 2025. Source: Rail Delivery Group.</p>
-                <p class="text-xs opacity-75">RefundMyRail is an independent tool and is not affiliated with National Rail.</p>
-            </div>
+    <footer class="mt-12 py-8 text-center text-xs font-medium text-slate-400 border-t border-slate-200 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <p class="mb-2">Contains National Rail data © 2025. Source: Rail Delivery Group.</p>
+            <p>RefundMyRail is an independent tool and is not affiliated with National Rail.</p>
         </div>
     </footer>
 
@@ -896,7 +888,8 @@
 
                 row.innerHTML = `
                     <td class="py-4 px-6 whitespace-nowrap text-sm text-slate-700" data-label="Date">${formatDateForDisplay(new Date(s.date))}</td>
-                    <td class="py-4 px-6 whitespace-nowrap text-sm text-slate-500 flex items-center" data-label="Type">${s.type} ${tocBadge}</td>
+                    <td class="py-4 px-6 whitespace-nowrap text-sm text-slate-500 flex items-center" data-label="Type">${s.type}</td>
+                    <td class="py-4 px-6 whitespace-nowrap text-sm text-slate-700 font-medium" data-label="Rail Operator">${tocBadge}</td>
                     <td class="py-4 px-6 whitespace-nowrap text-sm text-slate-700 font-medium" data-label="Sch. Dep">${formattedSchDep}</td>
                     <td class="py-4 px-6 whitespace-nowrap text-sm font-medium ${s.isCancelled ? 'text-red-600' : 'text-slate-700'}" data-label="Act. Arr">${formattedActArr}</td>
                     <td class="py-4 px-6 whitespace-nowrap text-sm ${statusClass}" data-label="Delay">${statusText}</td>

@@ -1,15 +1,25 @@
 Patch Notes
 
-v1.7.0 - Subscription Management & Persistence
+v1.7.2 - UI Standardization & Layout Fixes
 
 Status: Ready for Deployment
+
+🖥️ Dashboard UX & Fixes
+
+Table Layout Fix: Corrected column alignment in the results table where "Rail Operator" data was shifting into the "Type" column.
+Terminology: Renamed "TOC" column to "Rail Operator" for clarity.
+Visual Consistency: Standardized the Header (Navigation) and Footer across the Splash Page, Dashboard, and Subscription Manager to ensure a seamless user experience.
+
+v1.7.0 - Subscription Management & Persistence
+
+Status: Deployed
 
 📧 Feature: Subscription Manager
 
 Self-Service Portal: Added a dedicated "Manage Subscriptions" page (/manage).
 View Alerts: Users can now log in via email to see all their active route alerts.
 Delete Control: Added the ability for users to delete specific route subscriptions instantly.
-Navigation: Added "Manage Alerts" link to the Splash Page footer.
+Navigation: Added "Manage Alerts" link to the Splash Page footer and header.
 
 ⚙️ Backend & Architecture
 
@@ -18,10 +28,10 @@ Cache/Queue (Ephemeral): Handles high-velocity job queues and API caching (safe 
 Database (Persistent): Handles user subscription data (protected from eviction).
 Upstash TLS Auto-Fix: Added logic to automatically upgrade redis:// connection strings to rediss:// when connecting to Upstash, ensuring secure TLS connections without manual config changes.
 
-🖥️ Dashboard UX
+🖥️ Dashboard Logic
 
 Smart Resume: Refactored the session recovery logic. If a user refreshes the page during or after a search, the app now automatically retrieves the cached results and reconstructs the table without requiring user re-input.
-State Recovery: Improved localStorage saving to include full journey metadata, allowing for seamless session restoration.
+State Recovery: Improved localStorage saving to include full journey metadata.
 
 v1.6.3 - Refund Logic & Visual Clarity
 
