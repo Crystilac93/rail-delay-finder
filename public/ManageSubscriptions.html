@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RefundMyRail | Manage Subscriptions</title>
+    <link rel="icon" type="image/png" href="train_icon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .blob { position: absolute; filter: blur(40px); z-index: -1; opacity: 0.5; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-slate-200 z-30">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-2">
+                <img src="train_icon.png" alt="Logo" class="h-8 w-8">
+                <span class="font-bold text-lg text-slate-900">RefundMyRail</span>
+            </a>
+            <a href="/app" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700">Go to Dashboard &rarr;</a>
+        </div>
+    </nav>
+
+    <main class="flex-grow max-w-2xl mx-auto w-full px-4 py-12 relative">
+        <div class="blob bg-emerald-200 w-64 h-64 rounded-full top-0 left-0 -translate-x-1/2 mix-blend-multiply animate-blob"></div>
+
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
+            <h1 class="text-2xl font-extrabold mb-2 text-slate-900">Your Subscriptions</h1>
+            <p class="text-slate-500 mb-8 text-sm">Manage your automated delay alerts.</p>
+
+            <!-- Login State -->
+            <div id="login-view" class="space-y-4">
+                <label class="block text-sm font-bold text-slate-700">Enter your email to view alerts</label>
+                <div class="flex gap-3">
+                    <input type="email" id="email-input" placeholder="name@example.com" class="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none" required>
+                    <button id="load-btn" class="bg-emerald-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-100">
+                        Load
+                    </button>
+                </div>
+                <p class="text-xs text-slate-400 mt-2">Note: For this demo, entering your email will show public alerts associated with it.</p>
+            </div>
+
+            <!-- List State -->
+            <div id="list-view" class="hidden space-y-6">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
+                    <span id="user-email-display" class="text-sm font-medium text-slate-500"></span>
+                    <button id="logout-btn" class="text-xs font-bold text-emerald-600 hover:text-emerald-700">Change Email</button>
+                </div>
+
+                <div id="subs-container" class="space-y-4">
+                    <!-- Items will be injected here -->
+                </div>
+                
+                <p id="no-subs-msg" class="hidden text-center text-slate-400 py-8 text-sm">No subscriptions found for this email.</p>
+                
+                <div class="pt-6 border-t border-slate-100 mt-8">
+                    <a href="/" class="block w-full text-center py-3 rounded-xl border border-slate-200 font-bold text-slate-600 hover:bg-slate-50 transition-colors">
+                        + Add New Alert
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const els = {
+            loginView: document.getElementById('login-view'),
+            listView: document.getElementById('list-view'),
+            emailInput: document.getElementById('email-input'),
+            loadBtn: document.getElementById('load-btn'),
+            container: document.getElementById('subs-container'),
+            emailDisplay: document.getElementById('user-email-display'),
+            logoutBtn: document.getElementById('logout-btn'),
+            noSubs: document.getElementById('no-subs-msg')
+        };
+
+        let currentEmail = '';
+
+        // Check local storage for previous session
+        const savedEmail = localStorage.getItem('rail_user_email');
+        if(savedEmail) {
+            els.emailInput.value = savedEmail;
+        }
+
+        els.loadBtn.addEventListener('click', () => {
+            const email = els.emailInput.value.trim();
+            if(email) loadSubscriptions(email);
+        });
+
+        els.logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('rail_user_email');
+            els.listView.classList.add('hidden');
+            els.loginView.classList.remove('hidden');
+            els.emailInput.value = '';
+            currentEmail = '';
+        });
+
+        async function loadSubscriptions(email) {
+            els.loadBtn.textContent = 'Loading...';
+            els.loadBtn.disabled = true;
+
+            try {
+                const res = await fetch(`/api/subscriptions?email=${encodeURIComponent(email)}`);
+                if(!res.ok) throw new Error("Failed to fetch");
+                
+                const subs = await res.json();
+                renderList(subs);
+                
+                currentEmail = email;
+                localStorage.setItem('rail_user_email', email);
+                els.emailDisplay.textContent = email;
+                
+                els.loginView.classList.add('hidden');
+                els.listView.classList.remove('hidden');
+
+            } catch (e) {
+                alert("Error loading subscriptions: " + e.message);
+            } finally {
+                els.loadBtn.textContent = 'Load';
+                els.loadBtn.disabled = false;
+            }
+        }
+
+        function renderList(subs) {
+            els.container.innerHTML = '';
+            if(subs.length === 0) {
+                els.noSubs.classList.remove('hidden');
+                return;
+            }
+            els.noSubs.classList.add('hidden');
+
+            subs.forEach(sub => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-50 rounded-xl p-4 border border-slate-100 flex justify-between items-center hover:border-emerald-200 transition-colors group";
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="font-bold text-lg text-slate-800">${sub.route.from}</span>
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                            <span class="font-bold text-lg text-slate-800">${sub.route.to}</span>
+                        </div>
+                        <div class="flex gap-3 text-xs font-medium text-slate-500 uppercase tracking-wide">
+                            <span class="bg-white px-2 py-1 rounded shadow-sm border border-slate-100">AM: ${sub.times.am || '--:--'}</span>
+                            <span class="bg-white px-2 py-1 rounded shadow-sm border border-slate-100">PM: ${sub.times.pm || '--:--'}</span>
+                        </div>
+                    </div>
+                    <button class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-50 group-hover:opacity-100" title="Delete Alert" onclick="deleteSub('${sub.id}')">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                `;
+                els.container.appendChild(card);
+            });
+        }
+
+        async function deleteSub(id) {
+            if(!confirm("Are you sure you want to stop tracking this route?")) return;
+            
+            try {
+                const res = await fetch(`/api/subscription/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: currentEmail }) // Passing email to help cleanup index
+                });
+                
+                if(res.ok) {
+                    loadSubscriptions(currentEmail); // Reload list
+                } else {
+                    throw new Error("Delete failed");
+                }
+            } catch (e) {
+                alert("Error deleting: " + e.message);
+            }
+        }
+    </script>
+</body>
+</html>

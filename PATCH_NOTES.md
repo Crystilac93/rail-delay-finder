@@ -1,8 +1,31 @@
 Patch Notes
 
-v1.6.3 - Refund Logic & Visual Clarity
+v1.7.0 - Subscription Management & Persistence
 
 Status: Ready for Deployment
+
+📧 Feature: Subscription Manager
+
+Self-Service Portal: Added a dedicated "Manage Subscriptions" page (/manage).
+View Alerts: Users can now log in via email to see all their active route alerts.
+Delete Control: Added the ability for users to delete specific route subscriptions instantly.
+Navigation: Added "Manage Alerts" link to the Splash Page footer.
+
+⚙️ Backend & Architecture
+
+Dual Redis Strategy: Split the Redis connection into two distinct clients:
+Cache/Queue (Ephemeral): Handles high-velocity job queues and API caching (safe to evict/flush).
+Database (Persistent): Handles user subscription data (protected from eviction).
+Upstash TLS Auto-Fix: Added logic to automatically upgrade redis:// connection strings to rediss:// when connecting to Upstash, ensuring secure TLS connections without manual config changes.
+
+🖥️ Dashboard UX
+
+Smart Resume: Refactored the session recovery logic. If a user refreshes the page during or after a search, the app now automatically retrieves the cached results and reconstructs the table without requiring user re-input.
+State Recovery: Improved localStorage saving to include full journey metadata, allowing for seamless session restoration.
+
+v1.6.3 - Refund Logic & Visual Clarity
+
+Status: Deployed
 
 🎨 Dashboard Visuals
 

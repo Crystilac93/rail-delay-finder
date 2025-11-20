@@ -10,7 +10,14 @@ import Redis from 'ioredis';
 
 // --- Configuration ---
 const CONSUMER_KEY = process.env.RAIL_API_KEY;
-const REDIS_URL = process.env.REDIS_URL; 
+const PORT = process.env.PORT || 3000;
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
+// Redis Config
+// REDIS_URL: Your original cache/queue instance
+// REDIS_URL_DB: Your new Upstash instance for persistent subscriptions
+const REDIS_URL_CACHE = process.env.REDIS_URL; 
+const REDIS_URL_DB = process.env.REDIS_URL_DB || process.env.REDIS_URL; 
 
 if (!CONSUMER_KEY) {
     console.error("❌ FATAL ERROR: RAIL_API_KEY is not defined.");
@@ -19,16 +26,35 @@ if (!CONSUMER_KEY) {
 
 const METRICS_URL = "https://api1.raildata.org.uk/1010-historical-service-performance-_hsp_v1/api/v1/serviceMetrics";
 const DETAILS_URL = "https://api1.raildata.org.uk/1010-historical-service-performance-_hsp_v1/api/v1/serviceDetails";
-const PORT = process.env.PORT || 3000;
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
-// --- Redis Setup ---
-let connection;
-if (REDIS_URL) {
-    console.log("🔌 Connecting to Redis...");
-    connection = new Redis(REDIS_URL, { maxRetriesPerRequest: null });
+// --- Redis Connection Helper ---
+function createRedisClient(connectionString, name) {
+    if (!connectionString) {
+        console.warn(`⚠️  ${name} URL is missing.`);
+        return null;
+    }
+
+    let url = connectionString;
+    // Upstash requires TLS (rediss://). If the user provides redis:// for an upstash host, we auto-upgrade it.
+    if (url.includes('upstash.io') && url.startsWith('redis://')) {
+        console.log(`🔒 Upgrading ${name} connection to TLS (rediss://)`);
+        url = url.replace('redis://', 'rediss://');
+    }
+
+    return new Redis(url, { maxRetriesPerRequest: null });
+}
+
+// --- Redis Connections ---
+console.log("🔌 Connecting to Cache Redis...");
+const redisCache = createRedisClient(REDIS_URL_CACHE, "Cache");
+
+let redisDb;
+if (REDIS_URL_DB !== REDIS_URL_CACHE) {
+    console.log("💾 Connecting to Storage Redis...");
+    redisDb = createRedisClient(REDIS_URL_DB, "Storage");
 } else {
-    connection = new Redis({ maxRetriesPerRequest: null }); 
+    console.warn("⚠️  WARNING: Using the same Redis for Cache and Storage. Data loss risk if cache fills up.");
+    redisDb = redisCache;
 }
 
 // --- Helper Functions ---
@@ -44,15 +70,12 @@ function isDateInPast(dateStr) {
 }
 
 // --- Queue Setup ---
-const searchQueue = new Queue('rail-search-queue', { connection });
+const searchQueue = new Queue('rail-search-queue', { connection: redisCache });
 
 // --- Worker Setup ---
 const worker = new Worker('rail-search-queue', async (job) => {
     const { type, payload, cacheKey } = job.data;
     console.log(`⚙️ Processing job ${job.id}: ${type}`);
-
-    // Rate Limit
-    await new Promise(r => setTimeout(r, 1500)); 
 
     let url;
     if (type === 'metrics') url = METRICS_URL;
@@ -73,10 +96,10 @@ const worker = new Worker('rail-search-queue', async (job) => {
 
         const data = await response.json();
         
-        // Save to Redis Cache (Custom Persistence)
+        // Save to Redis Cache (Uses redisCache - ephemeral)
         if (type === 'details' || (type === 'metrics' && isDateInPast(payload.from_date))) {
              const stringData = JSON.stringify(data);
-             await connection.set(cacheKey, stringData); 
+             await redisCache.set(cacheKey, stringData, 'EX', 86400); // Expire cache after 24h
         }
 
         return data; 
@@ -86,7 +109,7 @@ const worker = new Worker('rail-search-queue', async (job) => {
         throw error;
     }
 }, { 
-    connection,
+    connection: redisCache,
     limiter: { max: 1, duration: 1500 }
 });
 
@@ -99,18 +122,18 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public'), { index: false })); 
 
-// --- API Endpoints ---
+// --- Core API Endpoints ---
 
 async function handleRequest(type, payload, res) {
     const cacheKey = getCacheKey(type, payload);
 
     try {
-        const cachedRaw = await connection.get(cacheKey);
+        const cachedRaw = await redisCache.get(cacheKey);
         if (cachedRaw) {
             return res.json({ jobId: `cached:${cacheKey}`, status: 'completed' });
         }
     } catch (e) {
-        console.error("Redis Error:", e);
+        console.error("Redis Cache Error:", e);
     }
 
     try {
@@ -136,7 +159,7 @@ app.get('/api/job/:id', async (req, res) => {
 
     if (jobId.startsWith('cached:')) {
         const cacheKey = jobId.split('cached:')[1];
-        const cachedRaw = await connection.get(cacheKey);
+        const cachedRaw = await redisCache.get(cacheKey);
         if (cachedRaw) {
              const data = JSON.parse(cachedRaw);
              return res.json({ status: 'completed', data: { ...data, _fromCache: true } });
@@ -164,17 +187,16 @@ app.get('/api/job/:id', async (req, res) => {
     }
 });
 
-// --- NEW: Subscription Endpoint ---
+// --- SUBSCRIPTION ENDPOINTS (Uses redisDb - persistent) ---
+
 app.post('/api/subscribe', async (req, res) => {
     const { email, fromCode, toCode, morningTime, eveningTime } = req.body;
 
-    // Basic Validation
     if (!email || !fromCode || !toCode) {
         return res.status(400).json({ error: "Missing required fields" });
     }
 
     try {
-        // Create a unique ID for this subscription
         const subId = crypto.randomUUID();
         const subscription = {
             id: subId,
@@ -185,17 +207,16 @@ app.post('/api/subscribe', async (req, res) => {
             active: true
         };
 
-        // Store in Redis
-        // 1. Store the full object by ID
-        await connection.set(`subscription:${subId}`, JSON.stringify(subscription));
+        // 1. Store object
+        await redisDb.set(`subscription:${subId}`, JSON.stringify(subscription));
         
-        // 2. Add ID to a list/set so we can find all subscriptions later
-        await connection.sadd('subscriptions:all', subId);
+        // 2. Add to global list (for future cron jobs)
+        await redisDb.sadd('subscriptions:all', subId);
         
-        // 3. Optional: Index by email to prevent duplicates or allow user lookup
-        await connection.sadd(`user_subs:${email}`, subId);
+        // 3. Add to user index (for management page)
+        await redisDb.sadd(`user_subs:${email}`, subId);
 
-        console.log(`📝 New subscription logged: ${email} [${fromCode} -> ${toCode}]`);
+        console.log(`📝 New subscription: ${email} [${fromCode}->${toCode}]`);
         res.json({ status: "success", id: subId });
 
     } catch (error) {
@@ -204,16 +225,80 @@ app.post('/api/subscribe', async (req, res) => {
     }
 });
 
+// GET subscriptions for a specific email
+app.get('/api/subscriptions', async (req, res) => {
+    const { email } = req.query;
+    if(!email) return res.status(400).json({ error: "Email required" });
+
+    try {
+        // 1. Get all IDs for this user from index
+        const subIds = await redisDb.smembers(`user_subs:${email}`);
+        
+        if(subIds.length === 0) return res.json([]);
+
+        // 2. Fetch actual data for each ID
+        const keys = subIds.map(id => `subscription:${id}`);
+        
+        // Use mget to fetch all keys in one round-trip
+        const rawSubs = await redisDb.mget(keys);
+        
+        const subscriptions = rawSubs
+            .filter(s => s !== null)
+            .map(s => JSON.parse(s));
+
+        res.json(subscriptions);
+
+    } catch (error) {
+        console.error("Fetch Subs Error:", error);
+        res.status(500).json({ error: "Failed to fetch subscriptions" });
+    }
+});
+
+// DELETE a subscription
+app.delete('/api/subscription/:id', async (req, res) => {
+    const { id } = req.params;
+    const { email } = req.body; 
+
+    try {
+        // Check if exists to ensure we clean up the correct indices
+        const subRaw = await redisDb.get(`subscription:${id}`);
+        if(!subRaw) return res.status(404).json({error: "Not found"});
+        
+        const sub = JSON.parse(subRaw);
+        const userEmail = email || sub.email;
+
+        // 1. Remove from KV
+        await redisDb.del(`subscription:${id}`);
+        
+        // 2. Remove from Global Set
+        await redisDb.srem('subscriptions:all', id);
+        
+        // 3. Remove from User Index
+        if(userEmail) {
+            await redisDb.srem(`user_subs:${userEmail}`, id);
+        }
+
+        console.log(`🗑️ Deleted subscription: ${id}`);
+        res.json({ status: "deleted" });
+
+    } catch (error) {
+        console.error("Delete Error:", error);
+        res.status(500).json({ error: "Failed to delete" });
+    }
+});
+
 // --- Routes ---
 
-// 1. Splash Page (Root)
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// 2. Premium App (Dashboard)
 app.get('/app', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'DelayRepayChecker.html'));
+});
+
+app.get('/manage', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'ManageSubscriptions.html'));
 });
 
 // --- Start Server ---

@@ -35,11 +35,10 @@
         .text-danger { color: #ef4444; font-weight: 600; }
         .text-success { color: #22c55e; font-weight: 600; }
         
-        /* FIXED: Added input[type="text"] here to ensure Home/Work Station boxes get the same grey border/shadow as Time inputs */
         input[type="time"], input[type="date"], input[type="text"], select { 
             -webkit-appearance: none; appearance: none; 
             background-color: #fff; 
-            border: 1px solid #d1d5db; /* The specific grey border you noticed */
+            border: 1px solid #d1d5db; 
             border-radius: 0.5rem; 
             padding: 0.6rem 0.875rem; 
             font-size: 1rem; 
@@ -64,10 +63,10 @@
         
         /* TOC Badges */
         .toc-badge { padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: white; display: inline-block; min-width: 2.5rem; text-align: center; }
-        .toc-gw { background-color: #0a4c3f; } /* GWR Dark Green */
-        .toc-sw { background-color: #0193d7; } /* SWR Blue */
-        .toc-vt { background-color: #b50e24; } /* Virgin/Avanti Red */
-        .toc-default { background-color: #64748b; } /* Generic Slate */
+        .toc-gw { background-color: #0a4c3f; } 
+        .toc-sw { background-color: #0193d7; } 
+        .toc-vt { background-color: #b50e24; } 
+        .toc-default { background-color: #64748b; } 
     </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50">
@@ -417,7 +416,7 @@
             const stored = localStorage.getItem(JOB_STORAGE_KEY);
             if (!stored) return null;
             const data = JSON.parse(stored);
-            if (Date.now() - data.timestamp > 15 * 60 * 1000) { localStorage.removeItem(JOB_STORAGE_KEY); return null; }
+            if (Date.now() - data.timestamp > 60 * 60 * 1000) { localStorage.removeItem(JOB_STORAGE_KEY); return null; }
             return data.data;
         }
 
@@ -450,8 +449,6 @@
                     els.officeDaysContainer.style.display = isWeek ? 'block' : 'none';
                     document.getElementById('date-picker-label').innerText = isWeek ? 'Select Week' : 'Select Day';
                     updateWeekLabel();
-                    
-                    // NEW: Adjust week commencing label visibility based on mode
                     if(isWeek) {
                          els.wcLabel.style.visibility = 'visible';
                     } else {
@@ -479,31 +476,94 @@
             }
         }
 
+        // --- UPDATED: Smart Resume Monitoring ---
         async function resumeMonitoring(savedData) {
-            showStatus("Continuing previous search in background...", "info");
-            clearJobStorage();
-            showStatus("Previous search session expired. Please search again.", "warning");
-            setLoading(false);
+            // If we have saved metrics job IDs, try to recover the session immediately
+            if (!savedData || !savedData.metricsJobIds || savedData.metricsJobIds.length === 0) {
+                clearJobStorage();
+                return; 
+            }
+
+            setLoading(true, "Restoring previous session...");
+            els.resultsArea.classList.add('hidden');
+            els.progressContainer.classList.remove('hidden');
+            updateProgress(5, 100, "Checking previous search...");
+
+            try {
+                // 1. Re-poll the metric jobs. Since they are likely cached or done, this should be fast.
+                // Note: savedData.metricsJobIds is now expected to be an array of { jobId, req } objects.
+                // We need the 'req' object to reconstruct the service list correctly (Date, Type, From, To).
+                const metricJobObjects = savedData.metricsJobIds;
+                
+                const metricResults = await Promise.all(metricJobObjects.map(async (item) => {
+                    // If the stored item is just a string ID (legacy), we can't fully recover metadata, so fail gracefully
+                    if (typeof item === 'string') throw new Error("Legacy storage format");
+                    
+                    const data = await pollJob(item.jobId);
+                    return { data, req: item.req };
+                }));
+
+                // 2. Reconstruct the 'allServices' list from the polled results
+                let allServices = [];
+                let allRids = [];
+                let hasCachedData = false;
+
+                metricResults.forEach(result => {
+                    const data = result.data;
+                    const req = result.req; // Restored request metadata
+                    
+                    if (data._fromCache) hasCachedData = true;
+                    
+                    if (data.Services) {
+                        data.Services.forEach(s => {
+                            const rid = s.serviceAttributesMetrics?.rids?.[0];
+                            if (rid && !allRids.includes(rid)) {
+                                allRids.push(rid);
+                                allServices.push({ 
+                                    rid, 
+                                    date: req.d, 
+                                    type: req.j.type, 
+                                    from: req.j.from, 
+                                    to: req.j.to 
+                                });
+                            }
+                        });
+                    }
+                });
+
+                if (hasCachedData) els.cacheIndicator.classList.remove('hidden'); else els.apiIndicator.classList.remove('hidden');
+
+                // 3. Resume Phase 2: Detail Fetching
+                if (allServices.length === 0) {
+                     showStatus("No services found in previous session.", "info");
+                     setLoading(false);
+                     els.progressContainer.classList.add('hidden');
+                     clearJobStorage();
+                     return;
+                }
+
+                await analyzeServices(allServices);
+
+            } catch (e) {
+                console.warn("Resume failed:", e);
+                clearJobStorage();
+                showStatus("Previous session expired. Please search again.", "warning");
+                setLoading(false);
+                els.progressContainer.classList.add('hidden');
+            }
         }
 
-        // --- UPDATED loadSettings: REMOVED DEFAULT VALUES ---
+        // --- UPDATED loadSettings ---
         function loadSettings() {
             const stored = localStorage.getItem('railDelaySettings');
             if (stored) {
                 try {
                     const s = JSON.parse(stored);
-                    
-                    // Price
                     if (s.ticketPrice) els.priceInput.value = s.ticketPrice;
-                    
-                    // Station Codes (only set if validly stored)
                     if (s.outFromCode) els.outFromCode.value = s.outFromCode;
                     if (s.outToCode) els.outToCode.value = s.outToCode;
-                    // Station Display Names (only set if validly stored)
                     if (s.outFromDisplay) els.outFrom.value = s.outFromDisplay;
                     if (s.outToDisplay) els.outTo.value = s.outToDisplay;
-                    
-                    // Times
                     if(s.fromTimeOutbound) els.timeOutStart.value = s.fromTimeOutbound;
                     if(s.toTimeOutbound) els.timeOutEnd.value = s.toTimeOutbound;
                     if(s.fromTimeInbound) els.timeInStart.value = s.fromTimeInbound;
@@ -528,14 +588,8 @@
         }
         function syncReturnJourney() { els.inFrom.value = els.outTo.value; els.inFromCode.value = els.outToCode.value; els.inTo.value = els.outFrom.value; els.inToCode.value = els.outFromCode.value; }
         function updateRouteLabels() { 
-            // Only show codes if they exist
             const outCode = els.outFromCode.value || '?';
             const inCode = els.outToCode.value || '?';
-            // REMOVED: Update text labels next to 'Morning/Evening Commute'
-            // els.outRouteDisplay.textContent = `(${outCode} ➝ ${inCode})`; 
-            // els.inRouteDisplay.textContent = `(${inCode} ➝ ${outCode})`; 
-            
-            // INSTEAD: Clear them to prevent '? - ?'
             if(els.outRouteDisplay) els.outRouteDisplay.textContent = '';
             if(els.inRouteDisplay) els.inRouteDisplay.textContent = '';
         }
@@ -560,6 +614,78 @@
                 } catch (e) { throw e; }
             }
             throw new Error('Timeout');
+        }
+
+        // --- NEW: Extracted Analysis Logic for reuse ---
+        async function analyzeServices(allServices) {
+            updateProgress(40, 100, `Analyzing ${allServices.length} trains...`);
+            
+            let detailJobIds = [];
+            for (const svc of allServices) {
+                const res = await fetch(DETAILS_URL, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ rid: svc.rid }) });
+                if(res.ok) {
+                    const { jobId } = await res.json();
+                    detailJobIds.push({ jobId, svc });
+                }
+            }
+            
+            let completedDetails = 0;
+            let detailedServices = [];
+            
+            await Promise.all(detailJobIds.map(async (item) => {
+                try {
+                    const detailsData = await pollJob(item.jobId);
+                    completedDetails++;
+                    const prog = 40 + Math.round((completedDetails / detailJobIds.length) * 50);
+                    updateProgress(prog, 100, `Analyzing ${completedDetails}/${detailJobIds.length} trains...`);
+                    
+                    if (detailsData) {
+                        const locs = detailsData.serviceAttributesDetails?.locations || [];
+                        const dep = locs.find(l => l.location === item.svc.from);
+                        const arr = locs.find(l => l.location === item.svc.to);
+                        if (dep && arr) {
+                            const isCancelled = !arr.actual_ta || arr.actual_ta === "";
+                            let delay = 0;
+                            if(!isCancelled) {
+                                const schTime = parseApiTime(arr.gbtt_pta);
+                                const actTime = parseApiTime(arr.actual_ta);
+                                if(schTime && actTime) {
+                                    if(actTime < schTime - 43200000) actTime.setDate(actTime.getDate() + 1);
+                                    delay = Math.max(0, Math.round((actTime - schTime) / 60000));
+                                }
+                            }
+                            detailedServices.push({ 
+                                date: item.svc.date, 
+                                type: item.svc.type, 
+                                schDep: dep.gbtt_ptd, 
+                                schArr: arr.gbtt_pta, 
+                                actArr: arr.actual_ta, 
+                                delay: delay, 
+                                isCancelled: isCancelled,
+                                toc: detailsData.serviceAttributesDetails.toc_code 
+                            });
+                        }
+                    }
+                } catch(e) { console.warn(e); }
+            }));
+
+            updateProgress(100, 100, "Finalizing...");
+            
+            detailedServices.sort((a,b) => {
+                if(a.date !== b.date) return a.date.localeCompare(b.date);
+                return a.schDep.localeCompare(b.schDep);
+            });
+            
+            lastResults = detailedServices;
+            calculateKPIs(detailedServices);
+            renderTable(detailedServices);
+            
+            els.resultsArea.classList.remove('hidden');
+            els.progressContainer.classList.add('hidden'); 
+            showStatus("Analysis Complete", "success");
+            clearJobStorage();
+            setTimeout(() => els.resultsArea.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+            setLoading(false);
         }
 
         async function handleSearch(e) {
@@ -595,14 +721,12 @@
                 { type: "Inbound", from: els.inFromCode.value, to: els.inToCode.value, start: els.timeInStart.value, end: els.timeInEnd.value }
             ];
 
-            // Basic validation check after removing defaults
             if (!journeys[0].from || !journeys[0].to) {
                 showStatus("Please select both Home and Work stations.", "error");
                 setLoading(false);
                 els.progressContainer.classList.add('hidden');
                 return;
             }
-
 
             let allServices = [];
             let allRids = [];
@@ -633,7 +757,9 @@
                     metricJobIds.push({ jobId, req });
                 }
 
-                saveJobToStorage({ metricsJobIds: metricJobIds.map(m => m.jobId) });
+                // UPDATED: Save full object including 'req' metadata, not just IDs
+                saveJobToStorage({ metricsJobIds: metricJobIds });
+                
                 let completedMetrics = 0;
                 updateProgress(10, 100, "Waiting for service lists...");
                 
@@ -665,79 +791,13 @@
                 
                 if (hasCachedData) els.cacheIndicator.classList.remove('hidden'); else els.apiIndicator.classList.remove('hidden');
 
-                updateProgress(40, 100, `Analyzing ${allServices.length} trains...`);
-                
-                let detailJobIds = [];
-                for (const svc of allServices) {
-                    const res = await fetch(DETAILS_URL, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ rid: svc.rid }) });
-                    if(res.ok) {
-                        const { jobId } = await res.json();
-                        detailJobIds.push({ jobId, svc });
-                    }
-                }
-                
-                let completedDetails = 0;
-                let detailedServices = [];
-                
-                await Promise.all(detailJobIds.map(async (item) => {
-                    try {
-                        const detailsData = await pollJob(item.jobId);
-                        completedDetails++;
-                        const prog = 40 + Math.round((completedDetails / detailJobIds.length) * 50);
-                        updateProgress(prog, 100, `Analyzing ${completedDetails}/${detailJobIds.length} trains...`);
-                        
-                        if (detailsData) {
-                            const locs = detailsData.serviceAttributesDetails?.locations || [];
-                            const dep = locs.find(l => l.location === item.svc.from);
-                            const arr = locs.find(l => l.location === item.svc.to);
-                            if (dep && arr) {
-                                const isCancelled = !arr.actual_ta || arr.actual_ta === "";
-                                let delay = 0;
-                                if(!isCancelled) {
-                                    const schTime = parseApiTime(arr.gbtt_pta);
-                                    const actTime = parseApiTime(arr.actual_ta);
-                                    if(schTime && actTime) {
-                                        if(actTime < schTime - 43200000) actTime.setDate(actTime.getDate() + 1);
-                                        delay = Math.max(0, Math.round((actTime - schTime) / 60000));
-                                    }
-                                }
-                                detailedServices.push({ 
-                                    date: item.svc.date, 
-                                    type: item.svc.type, 
-                                    schDep: dep.gbtt_ptd, 
-                                    schArr: arr.gbtt_pta, 
-                                    actArr: arr.actual_ta, 
-                                    delay: delay, 
-                                    isCancelled: isCancelled,
-                                    toc: detailsData.serviceAttributesDetails.toc_code // Pass TOC code for display
-                                });
-                            }
-                        }
-                    } catch(e) { console.warn(e); }
-                }));
-
-                updateProgress(100, 100, "Finalizing...");
-                
-                detailedServices.sort((a,b) => {
-                    if(a.date !== b.date) return a.date.localeCompare(b.date);
-                    return a.schDep.localeCompare(b.schDep);
-                });
-                
-                lastResults = detailedServices;
-                calculateKPIs(detailedServices);
-                renderTable(detailedServices);
-                
-                els.resultsArea.classList.remove('hidden');
-                els.progressContainer.classList.add('hidden'); 
-                showStatus("Analysis Complete", "success");
-                clearJobStorage();
-                setTimeout(() => els.resultsArea.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+                // Hand off to the shared analysis function
+                await analyzeServices(allServices);
 
             } catch (e) {
                 showStatus("Error: " + e.message, "error");
                 els.progressContainer.classList.add('hidden');
                 clearJobStorage();
-            } finally {
                 setLoading(false);
             }
         }
@@ -748,8 +808,6 @@
             const perJourney = price / divisor;
             
             let counts = { cancel: 0, sev: 0, maj: 0, med: 0, min: 0 };
-            
-            // --- New Calculation Logic: Maximum Refund per Leg ---
             let maxRefunds = {}; 
 
             services.forEach(s => {
@@ -771,14 +829,12 @@
                     refund = perJourney * 0.25;
                 }
                 
-                // Find Max Refund for this specific leg (Date + Direction)
-                const key = `${s.date}_${s.type}`; // e.g., "2023-11-14_Outbound"
+                const key = `${s.date}_${s.type}`; 
                 if (!maxRefunds[key] || refund > maxRefunds[key]) {
                     maxRefunds[key] = refund;
                 }
             });
 
-            // Sum up the maximums found for each unique journey leg
             let totalRefund = 0;
             for (const key in maxRefunds) {
                 totalRefund += maxRefunds[key];
@@ -818,7 +874,6 @@
                 const formattedSchDep = formatTime(s.schDep);
                 const formattedActArr = s.isCancelled ? 'Cancelled' : formatTime(s.actArr);
                 
-                // TOC Badge logic
                 let tocBadge = '';
                 if (s.toc) {
                     let tocClass = 'toc-default';
