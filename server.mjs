@@ -98,7 +98,9 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-// Serve static files BUT we will handle index.html and DelayRepayChecker.html manually via routes
+
+// Serve static files (JS, CSS, Images) automatically
+// BUT we exclude index.html so we can route the root manually
 app.use(express.static(path.join(__dirname, 'public'), { index: false })); 
 
 // --- API Endpoints (Same as before) ---
@@ -106,7 +108,6 @@ app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 async function handleRequest(type, payload, res) {
     const cacheKey = getCacheKey(type, payload);
 
-    // 1. Check Custom Redis Cache
     try {
         const cachedRaw = await connection.get(cacheKey);
         if (cachedRaw) {
@@ -117,7 +118,6 @@ async function handleRequest(type, payload, res) {
         console.error("Redis Error:", e);
     }
 
-    // 2. Enqueue if not cached
     try {
         const job = await searchQueue.add(type, { type, payload, cacheKey });
         res.json({ jobId: job.id, status: 'queued' });
