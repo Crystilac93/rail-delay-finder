@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
-import { Queue, Worker } from 'bullmq'; // Import BullMQ
+import { Queue, Worker } from 'bullmq'; 
 import Redis from 'ioredis';
 
 // --- Configuration ---
@@ -22,29 +22,36 @@ const DETAILS_URL = "https://api1.raildata.org.uk/1010-historical-service-perfor
 const PORT = process.env.PORT || 3000;
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
-// --- Redis Connection ---
-// We need a connection object for BullMQ
+// --- Redis Setup ---
 let connection;
 if (REDIS_URL) {
     console.log("🔌 Connecting to Redis...");
     connection = new Redis(REDIS_URL, { maxRetriesPerRequest: null });
 } else {
-    console.warn("⚠️ No REDIS_URL. Queueing will not work correctly without Redis.");
-    // In a real app, we'd exit or fallback to an in-memory mock, 
-    // but for this example, we assume Redis is available as per v1.4.0 setup.
     connection = new Redis({ maxRetriesPerRequest: null }); 
+}
+
+// --- Helper Functions ---
+function getCacheKey(endpoint, payload) {
+    const dataString = endpoint + JSON.stringify(payload);
+    return crypto.createHash('md5').update(dataString).digest('hex');
+}
+
+function isDateInPast(dateStr) {
+    if (!dateStr) return false;
+    const today = new Date().toISOString().split('T')[0];
+    return dateStr < today;
 }
 
 // --- Queue Setup ---
 const searchQueue = new Queue('rail-search-queue', { connection });
 
-// --- Worker Setup (The Background Processor) ---
-// This processes jobs ONE by ONE to respect rate limits
+// --- Worker Setup ---
 const worker = new Worker('rail-search-queue', async (job) => {
-    const { type, payload } = job.data;
+    const { type, payload, cacheKey } = job.data;
     console.log(`⚙️ Processing job ${job.id}: ${type}`);
 
-    // Artificial delay to enforce global rate limit across all users
+    // Rate Limit
     await new Promise(r => setTimeout(r, 1500)); 
 
     let url;
@@ -59,16 +66,22 @@ const worker = new Worker('rail-search-queue', async (job) => {
         });
 
         if (!response.ok) {
-            // If rate limited, throw error so BullMQ retries later automatically
-            if (response.status === 429) {
-                throw new Error('Rate Limited');
-            }
+            if (response.status === 429) throw new Error('Rate Limited');
             const text = await response.text();
             throw new Error(`API Error ${response.status}: ${text}`);
         }
 
         const data = await response.json();
-        return data; // This result is stored in Redis by BullMQ
+        
+        // Save to Redis Cache (Custom Persistence)
+        // We do this here so future requests skip the queue!
+        if (type === 'details' || (type === 'metrics' && isDateInPast(payload.from_date))) {
+             const stringData = JSON.stringify(data);
+             await connection.set(cacheKey, stringData); 
+             console.log(`💾 Cached result for ${cacheKey}`);
+        }
+
+        return data; 
 
     } catch (error) {
         console.error(`Job ${job.id} failed: ${error.message}`);
@@ -76,10 +89,7 @@ const worker = new Worker('rail-search-queue', async (job) => {
     }
 }, { 
     connection,
-    limiter: {
-        max: 1,      // Max 1 job
-        duration: 1500 // Per 1500ms (Strict Rate Limiting)
-    }
+    limiter: { max: 1, duration: 1500 }
 });
 
 // --- Express App ---
@@ -91,62 +101,76 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// --- Helper: Cache Key ---
-function getCacheKey(endpoint, payload) {
-    const dataString = endpoint + JSON.stringify(payload);
-    return crypto.createHash('md5').update(dataString).digest('hex');
-}
-
 // --- API Endpoints ---
 
-// 1. Enqueue Metrics Search
+// Generic handler to check cache first
+async function handleRequest(type, payload, res) {
+    const cacheKey = getCacheKey(type, payload);
+
+    // 1. Check Custom Redis Cache
+    try {
+        const cachedRaw = await connection.get(cacheKey);
+        if (cachedRaw) {
+            console.log(`⚡ Cache Hit: Skipping queue for ${type}`);
+            const cachedData = JSON.parse(cachedRaw);
+            // We return a "fake" completed job structure so frontend polling works instantly
+            // Or better: we return a special status that tells frontend "It's done!"
+            // But to keep frontend simple (it expects a jobId to poll), 
+            // let's return a jobId of "cached_<key>" and handle that in the /job/:id endpoint.
+            return res.json({ jobId: `cached:${cacheKey}`, status: 'completed' });
+        }
+    } catch (e) {
+        console.error("Redis Error:", e);
+    }
+
+    // 2. Enqueue if not cached
+    try {
+        const job = await searchQueue.add(type, { type, payload, cacheKey });
+        res.json({ jobId: job.id, status: 'queued' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
 app.post('/api/servicemetrics', async (req, res) => {
     const payload = req.body;
     if (!payload.to_date && payload.from_date) payload.to_date = payload.from_date;
-
-    // Check if we already have a cached result in Redis directly (Optimization)
-    // Note: BullMQ stores job results, but we can also use our manual cache logic from v1.4
-    // For simplicity in v1.5, we rely on BullMQ's job storage.
-    
-    try {
-        const job = await searchQueue.add('metrics', { type: 'metrics', payload });
-        res.json({ jobId: job.id, status: 'queued' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    await handleRequest('metrics', payload, res);
 });
 
-// 2. Enqueue Details Search
 app.post('/api/servicedetails', async (req, res) => {
-    const payload = req.body;
-    try {
-        const job = await searchQueue.add('details', { type: 'details', payload });
-        res.json({ jobId: job.id, status: 'queued' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    await handleRequest('details', req.body, res);
 });
 
 // 3. Job Status Endpoint (Polling)
 app.get('/api/job/:id', async (req, res) => {
     const jobId = req.params.id;
+
+    // Special handling for instant cache hits
+    if (jobId.startsWith('cached:')) {
+        const cacheKey = jobId.split('cached:')[1];
+        const cachedRaw = await connection.get(cacheKey);
+        if (cachedRaw) {
+             const data = JSON.parse(cachedRaw);
+             // Inject flag so frontend shows blue badge
+             return res.json({ status: 'completed', data: { ...data, _fromCache: true } });
+        } else {
+            return res.status(404).json({ error: 'Cache expired' });
+        }
+    }
+
     try {
         const job = await searchQueue.getJob(jobId);
-        
-        if (!job) {
-            return res.status(404).json({ error: 'Job not found' });
-        }
+        if (!job) return res.status(404).json({ error: 'Job not found' });
 
-        const state = await job.getState(); // 'completed', 'failed', 'delayed', 'active', 'waiting'
+        const state = await job.getState(); 
         
         if (state === 'completed') {
-            // Return the actual data
             const result = job.returnvalue;
             res.json({ status: 'completed', data: result });
         } else if (state === 'failed') {
             res.json({ status: 'failed', error: job.failedReason });
         } else {
-            // Still working
             res.json({ status: 'pending', state });
         }
     } catch (error) {
@@ -158,24 +182,20 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'DelayRepayChecker.html'));
 });
 
-// --- Start Server ---
 if (IS_PRODUCTION) {
     http.createServer(app).listen(PORT, () => {
-        console.log(`🚀 Production server (Queue Enabled) running on port ${PORT}`);
+        console.log(`🚀 Production server (Queue+Cache) running on port ${PORT}`);
     });
 } else {
     try {
-        const httpsOptions = {
-            key: fs.readFileSync('key.pem'),
-            cert: fs.readFileSync('cert.pem')
-        };
+        const httpsOptions = { key: fs.readFileSync('key.pem'), cert: fs.readFileSync('cert.pem') };
         https.createServer(httpsOptions, app).listen(PORT, () => {
-            console.log(`🔒 Local server (Queue Enabled) running on https://localhost:${PORT}`);
+            console.log(`🔒 Local server (Queue+Cache) running on https://localhost:${PORT}`);
         });
     } catch (e) {
-        console.warn("⚠️  SSL keys not found. Falling back to HTTP.");
+        console.warn("⚠️ SSL keys not found. Falling back to HTTP.");
         http.createServer(app).listen(PORT, () => {
-            console.log(`⚠️  Local server running on http://localhost:${PORT}`);
+            console.log(`⚠️ Local server running on http://localhost:${PORT}`);
         });
     }
 }
