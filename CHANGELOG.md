@@ -2,6 +2,35 @@
 
 All notable changes to RefundMyRail will be documented in this file.
 
+## [0.1.4] - 2025-11-21
+
+### ✨ Features
+- **User Settings Page Refactoring**
+  - Transformed "Manage Alerts" page into comprehensive "User Settings" page
+  - Implemented tabbed interface with two sections:
+    - **Alerts & Subscriptions**: Manage email alert subscriptions
+    - **Preferences**: Configure default settings (ticket price, commute times)
+  - Added localStorage integration for cross-page settings synchronization
+  - Settings now shared between Dashboard and User Settings page via `railDelaySettings` key
+
+### 🎨 UI/UX Improvements
+- **Navigation Updates**
+  - Renamed "Alerts" navigation link to "Settings" across all pages
+  - Updated `index.html`, `Dashboard.html`, and `auth-ui.js` navigation
+  - ManageSubscriptions page now titled "User Settings"
+  
+- **Settings Management**
+  - Centralized user preferences in dedicated Settings page
+  - Visual "Saved!" confirmation feedback on preference updates
+  - Preserved existing subscription management functionality
+  - Maintained Dashboard inline settings panel for backward compatibility
+
+### 🔧 Technical Details
+- Shared localStorage schema for settings synchronization
+- Retained authentication and route protection
+- Settings persist across page navigation
+- Both Dashboard and Settings pages can read/write user preferences
+
 ## [0.1.3] - 2025-11-21
 
 ### 🎨 UI/UX Improvements

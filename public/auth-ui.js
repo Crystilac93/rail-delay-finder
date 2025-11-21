@@ -31,7 +31,7 @@ function updateNavigation(authState) {
         // Hide login/register, show user menu
         navLinks.innerHTML = `
             <a href="/app" class="text-sm font-bold text-slate-600 hover:text-emerald-600 transition-colors">Dashboard</a>
-            <a href="/manage" class="hidden sm:block text-sm font-bold text-slate-600 hover:text-emerald-600 transition-colors">Manage Alerts</a>
+            <a href="/manage" class="hidden sm:block text-sm font-bold text-slate-600 hover:text-emerald-600 transition-colors">Settings</a>
         `;
         userMenu.innerHTML = `
             <div class="flex items-center gap-3">
@@ -45,7 +45,7 @@ function updateNavigation(authState) {
         // Show login/register
         navLinks.innerHTML = `
             <a href="/app" class="text-sm font-bold text-slate-600 hover:text-emerald-600 transition-colors">Dashboard</a>
-            <a href="/manage" class="hidden sm:block text-sm font-bold text-slate-600 hover:text-emerald-600 transition-colors">Alerts</a>
+            <a href="/manage" class="hidden sm:block text-sm font-bold text-slate-600 hover:text-emerald-600 transition-colors">Settings</a>
         `;
         userMenu.innerHTML = `
             <a href="/login" class="px-4 py-2 text-sm font-bold bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 transition-colors">
