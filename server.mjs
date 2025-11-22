@@ -252,6 +252,11 @@ app.get('/api/job/:id', async (req, res) => {
 
 const loginAttempts = new Map();
 function checkRateLimit(ip, maxAttempts = 5, windowMs = 15 * 60 * 1000) {
+    // Skip rate limiting for development or localhost
+    if (!IS_PRODUCTION || ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1') {
+        return true;
+    }
+
     const now = Date.now();
     const attempts = loginAttempts.get(ip) || [];
     const recentAttempts = attempts.filter(time => now - time < windowMs);
@@ -462,6 +467,53 @@ app.delete('/api/subscription/:id', async (req, res) => {
     } catch (error) {
         console.error("Delete Error:", error);
         res.status(500).json({ error: "Failed to delete" });
+    }
+});
+
+// --- USER PREFERENCES ENDPOINTS ---
+
+app.post('/api/user/preferences', async (req, res) => {
+    if (!req.session || !req.session.email) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    if (!redisDb) {
+        console.error("❌ Redis DB not connected");
+        return res.status(500).json({ error: 'Database not available' });
+    }
+
+    const email = req.session.email;
+    const prefs = req.body;
+
+    try {
+        await redisDb.set(`user_prefs:${email}`, JSON.stringify(prefs));
+        console.log(`💾 Saved preferences for: ${email}`);
+        res.json({ status: 'success' });
+    } catch (error) {
+        console.error('Save Prefs Error:', error);
+        res.status(500).json({ error: 'Failed to save preferences' });
+    }
+});
+
+app.get('/api/user/preferences', async (req, res) => {
+    if (!req.session || !req.session.email) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    if (!redisDb) {
+        console.error("❌ Redis DB not connected");
+        return res.status(500).json({ error: 'Database not available' });
+    }
+
+    const email = req.session.email;
+
+    try {
+        const rawPrefs = await redisDb.get(`user_prefs:${email}`);
+        const prefs = rawPrefs ? JSON.parse(rawPrefs) : {};
+        res.json(prefs);
+    } catch (error) {
+        console.error('Load Prefs Error:', error);
+        res.status(500).json({ error: 'Failed to load preferences' });
     }
 });
 

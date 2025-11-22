@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en-GB">
 
 <head>
@@ -261,321 +261,336 @@
             </div>
         </div>
     </footer>
+            <!-- Auth UI Utilities -->
+            <script src="auth-ui.js"></script>
+            <script>
+                const els = {
+                    loadingView: document.getElementById('loading-view'),
+                    listView: document.getElementById('list-view'),
+                    container: document.getElementById('subs-container'),
+                    emailDisplay: document.getElementById('user-email-display'),
+                    noSubs: document.getElementById('no-subs-msg'),
 
-    <!-- Auth UI Utilities -->
-    <script src="auth-ui.js"></script>
-    <script>
-        const els = {
-            loadingView: document.getElementById('loading-view'),
-            listView: document.getElementById('list-view'),
-            container: document.getElementById('subs-container'),
-            emailDisplay: document.getElementById('user-email-display'),
-            noSubs: document.getElementById('no-subs-msg'),
+                    // Tabs
+                    tabAlerts: document.getElementById('tab-alerts'),
+                    tabPrefs: document.getElementById('tab-preferences'),
+                    panelAlerts: document.getElementById('panel-alerts'),
+                    panelPrefs: document.getElementById('panel-preferences'),
 
-            // Tabs
-            tabAlerts: document.getElementById('tab-alerts'),
-            tabPrefs: document.getElementById('tab-preferences'),
-            panelAlerts: document.getElementById('panel-alerts'),
-            panelPrefs: document.getElementById('panel-preferences'),
+                    // Prefs
+                    prefPrice: document.getElementById('pref-ticket-price'),
+                    prefAmStart: document.getElementById('pref-am-start'),
+                    prefAmEnd: document.getElementById('pref-am-end'),
+                    prefPmStart: document.getElementById('pref-pm-start'),
+                    prefPmEnd: document.getElementById('pref-pm-end'),
+                    saveBtn: document.getElementById('save-prefs-btn'),
 
-            // Prefs
-            prefPrice: document.getElementById('pref-ticket-price'),
-            prefAmStart: document.getElementById('pref-am-start'),
-            prefAmEnd: document.getElementById('pref-am-end'),
-            prefPmStart: document.getElementById('pref-pm-start'),
-            prefPmEnd: document.getElementById('pref-pm-end'),
-            saveBtn: document.getElementById('save-prefs-btn'),
+                    // Station inputs
+                    prefHomeStation: document.getElementById('pref-home-station'),
+                    prefHomeStationCode: document.getElementById('pref-home-station-code'),
+                    prefWorkStation: document.getElementById('pref-work-station'),
+                    prefWorkStationCode: document.getElementById('pref-work-station-code'),
+                    resultsHome: document.getElementById('results-pref-home'),
+                    resultsWork: document.getElementById('results-pref-work')
+                };
 
-            // Station inputs
-            prefHomeStation: document.getElementById('pref-home-station'),
-            prefHomeStationCode: document.getElementById('pref-home-station-code'),
-            prefWorkStation: document.getElementById('pref-work-station'),
-            prefWorkStationCode: document.getElementById('pref-work-station-code'),
-            resultsHome: document.getElementById('results-pref-home'),
-            resultsWork: document.getElementById('results-pref-work')
-        };
+                let currentUser = null;
+                let stationsData = [];
 
-        let currentUser = null;
-        let stationsData = [];
+                // Autocomplete function
+                function setupAutocomplete(inputEl, resultsEl, codeEl) {
+                    inputEl.addEventListener('input', (e) => {
+                        const query = e.target.value.trim();
+                        if (query.length < 2) {
+                            resultsEl.classList.add('hidden');
+                            return;
+                        }
 
-        // Autocomplete function
-        function setupAutocomplete(inputEl, resultsEl, codeEl) {
-            inputEl.addEventListener('input', (e) => {
-                const query = e.target.value.trim();
-                if (query.length < 2) {
-                    resultsEl.classList.add('hidden');
-                    return;
+                        const matches = stationsData
+                            .filter(s => s.stationName && s.stationName.toLowerCase().includes(query.toLowerCase()))
+                            .slice(0, 5);
+
+                        if (matches.length === 0) {
+                            resultsEl.classList.add('hidden');
+                            return;
+                        }
+
+                        resultsEl.innerHTML = matches.map(s => {
+                            const name = s.stationName.replace(
+                                new RegExp(query, 'gi'),
+                                match => `<strong>${match}</strong>`
+                            );
+                            return `<div class="autocomplete-item" data-name="${s.stationName}" data-code="${s.crsCode}">${name} (${s.crsCode})</div>`;
+                        }).join('');
+                        resultsEl.classList.remove('hidden');
+                    });
+
+                    resultsEl.addEventListener('click', (e) => {
+                        const item = e.target.closest('.autocomplete-item');
+                        if (!item) return;
+
+                        inputEl.value = item.dataset.name;
+                        codeEl.value = item.dataset.code;
+                        resultsEl.classList.add('hidden');
+                    });
+
+                    // Close on outside click
+                    document.addEventListener('click', (e) => {
+                        if (!inputEl.contains(e.target) && !resultsEl.contains(e.target)) {
+                            resultsEl.classList.add('hidden');
+                        }
+                    });
                 }
 
-                const matches = stationsData
-                    .filter(s => s.stationName && s.stationName.toLowerCase().includes(query.toLowerCase()))
-                    .slice(0, 5);
+                // Initialize auth UI and protect route
+                (async () => {
+                    // Initialize navigation with auth state
+                    const authState = await initAuthUI();
 
-                if (matches.length === 0) {
-                    resultsEl.classList.add('hidden');
-                    return;
-                }
-
-                resultsEl.innerHTML = matches.map(s => {
-                    const name = s.stationName.replace(
-                        new RegExp(query, 'gi'),
-                        match => `<strong>${match}</strong>`
-                    );
-                    return `<div class="autocomplete-item" data-name="${s.stationName}" data-code="${s.crsCode}">${name} (${s.crsCode})</div>`;
-                }).join('');
-                resultsEl.classList.remove('hidden');
-            });
-
-            resultsEl.addEventListener('click', (e) => {
-                const item = e.target.closest('.autocomplete-item');
-                if (!item) return;
-
-                inputEl.value = item.dataset.name;
-                codeEl.value = item.dataset.code;
-                resultsEl.classList.add('hidden');
-            });
-
-            // Close on outside click
-            document.addEventListener('click', (e) => {
-                if (!inputEl.contains(e.target) && !resultsEl.contains(e.target)) {
-                    resultsEl.classList.add('hidden');
-                }
-            });
-        }
-
-        // Initialize auth UI and protect route
-        (async () => {
-            // Initialize navigation with auth state
-            const authState = await initAuthUI();
-
-            // Protect this route - require authentication
-            if (!authState.isAuthenticated) {
-                const currentPath = window.location.pathname;
-                window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
-                return;
-            }
-
-            currentUser = authState.user;
-
-            // Update UI with user info
-            els.emailDisplay.textContent = currentUser.email;
-
-            // Setup Tabs
-            setupTabs();
-
-            // Load stations and setup autocomplete
-            fetch('/stations.json')
-                .then(res => res.json())
-                .then(data => {
-                    stationsData = data;
-                    console.log('✅ Loaded', stationsData.length, 'stations');
-                    // Setup autocomplete after stations load
-                    setupAutocomplete(els.prefHomeStation, els.resultsHome, els.prefHomeStationCode);
-                    setupAutocomplete(els.prefWorkStation, els.resultsWork, els.prefWorkStationCode);
-                })
-                .catch(e => console.error('❌ Failed to load stations:', e));
-
-            // Load Data
-            loadPreferences();
-            await loadSubscriptions();
-        })();
-
-        function setupTabs() {
-            const setActive = (isAlerts) => {
-                if (isAlerts) {
-                    els.tabAlerts.classList.add('border-emerald-500', 'text-emerald-600');
-                    els.tabAlerts.classList.remove('border-transparent', 'text-slate-500');
-                    els.tabPrefs.classList.add('border-transparent', 'text-slate-500');
-                    els.tabPrefs.classList.remove('border-emerald-500', 'text-emerald-600');
-
-                    els.panelAlerts.classList.remove('hidden');
-                    els.panelPrefs.classList.add('hidden');
-                } else {
-                    els.tabPrefs.classList.add('border-emerald-500', 'text-emerald-600');
-                    els.tabPrefs.classList.remove('border-transparent', 'text-slate-500');
-                    els.tabAlerts.classList.add('border-transparent', 'text-slate-500');
-                    els.tabAlerts.classList.remove('border-emerald-500', 'text-emerald-600');
-
-                    els.panelPrefs.classList.remove('hidden');
-                    els.panelAlerts.classList.add('hidden');
-                }
-            };
-
-            els.tabAlerts.addEventListener('click', () => setActive(true));
-            els.tabPrefs.addEventListener('click', () => setActive(false));
-
-            // Check URL hash for default tab
-            if (window.location.hash === '#preferences') {
-                setActive(false);
-            }
-        }
-
-        // --- PREFERENCES ---
-        function loadPreferences() {
-            const stored = localStorage.getItem('railDelaySettings');
-            if (stored) {
-                try {
-                    const s = JSON.parse(stored);
-                    if (s.ticketPrice) els.prefPrice.value = s.ticketPrice;
-                    if (s.fromTimeOutbound) els.prefAmStart.value = s.fromTimeOutbound;
-                    if (s.toTimeOutbound) els.prefAmEnd.value = s.toTimeOutbound;
-                    if (s.fromTimeInbound) els.prefPmStart.value = s.fromTimeInbound;
-                    if (s.toTimeInbound) els.prefPmEnd.value = s.toTimeInbound;
-
-                    // Load stations
-                    if (s.homeStation) els.prefHomeStation.value = s.homeStation;
-                    if (s.homeStationCode) els.prefHomeStationCode.value = s.homeStationCode;
-                    if (s.workStation) els.prefWorkStation.value = s.workStation;
-                    if (s.workStationCode) els.prefWorkStationCode.value = s.workStationCode;
-
-                } catch (e) {
-                    console.error("Error loading settings", e);
-                }
-            }
-
-            els.saveBtn.addEventListener('click', savePreferences);
-        }
-
-        function savePreferences() {
-            // Read existing to preserve other keys (like officeDays)
-            let s = {};
-            try {
-                s = JSON.parse(localStorage.getItem('railDelaySettings')) || {};
-            } catch (e) { }
-
-            s.ticketPrice = els.prefPrice.value;
-            s.fromTimeOutbound = els.prefAmStart.value;
-            s.toTimeOutbound = els.prefAmEnd.value;
-            s.fromTimeInbound = els.prefPmStart.value;
-            s.toTimeInbound = els.prefPmEnd.value;
-
-            // Save stations
-            s.homeStation = els.prefHomeStation.value;
-            s.homeStationCode = els.prefHomeStationCode.value;
-            s.workStation = els.prefWorkStation.value;
-            s.workStationCode = els.prefWorkStationCode.value;
-
-            localStorage.setItem('railDelaySettings', JSON.stringify(s));
-
-            // Visual Feedback
-            const originalText = els.saveBtn.innerHTML;
-            els.saveBtn.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span>Saved!</span>`;
-            els.saveBtn.classList.add('bg-emerald-700');
-
-            setTimeout(() => {
-                els.saveBtn.innerHTML = originalText;
-                els.saveBtn.classList.remove('bg-emerald-700');
-            }, 2000);
-        }
-
-
-        // --- SUBSCRIPTIONS ---
-        async function loadSubscriptions() {
-            els.loadingView.classList.remove('hidden');
-            els.listView.classList.add('hidden');
-
-            try {
-                const res = await fetch(`/api/subscriptions?email=${encodeURIComponent(currentUser.email)}`, {
-                    credentials: 'include'
-                });
-
-                if (!res.ok) {
-                    if (res.status === 401) {
-                        window.location.href = '/login?redirect=/manage';
+                    // Protect this route - require authentication
+                    if (!authState.isAuthenticated) {
+                        const currentPath = window.location.pathname;
+                        window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
                         return;
                     }
-                    throw new Error("Failed to fetch subscriptions");
-                }
 
-                const subs = await res.json();
-                renderList(subs);
+                    currentUser = authState.user;
 
-                els.loadingView.classList.add('hidden');
-                els.listView.classList.remove('hidden');
+                    // Update UI with user info
+                    els.emailDisplay.textContent = currentUser.email;
 
-            } catch (e) {
-                console.error('Error loading subscriptions:', e);
-                els.loadingView.innerHTML = `<p class="text-red-600">Error loading subscriptions: ${e.message}</p><button onclick="location.reload()" class="mt-4 text-emerald-600 hover:text-emerald-700 font-bold">Retry</button>`;
-            }
-        }
+                    // Setup Tabs
+                    setupTabs();
 
-        function renderList(subs) {
-            els.container.innerHTML = '';
-            if (subs.length === 0) {
-                els.noSubs.classList.remove('hidden');
-                return;
-            }
-            els.noSubs.classList.add('hidden');
+                    // Load stations and setup autocomplete
+                    fetch('/stations.json')
+                        .then(res => res.json())
+                        .then(data => {
+                            stationsData = data;
+                            console.log('✅ Loaded', stationsData.length, 'stations');
+                            // Setup autocomplete after stations load
+                            setupAutocomplete(els.prefHomeStation, els.resultsHome, els.prefHomeStationCode);
+                            setupAutocomplete(els.prefWorkStation, els.resultsWork, els.prefWorkStationCode);
+                        })
+                        .catch(e => console.error('❌ Failed to load stations:', e));
 
-            subs.forEach(sub => {
-                // Handle both old and new data structures
-                let amDisplay = '--:--';
-                let pmDisplay = '--:--';
+                    // Load Data
+                    await loadPreferences();
+                    await loadSubscriptions();
+                })();
 
-                if (sub.times) {
-                    if (sub.times.morning && sub.times.morning.start) {
-                        // New Structure
-                        amDisplay = `${sub.times.morning.start} - ${sub.times.morning.end}`;
-                        pmDisplay = `${sub.times.evening.start} - ${sub.times.evening.end}`;
-                    } else {
-                        // Fallback for old data
-                        amDisplay = sub.times.am || 'Invalid';
-                        pmDisplay = sub.times.pm || 'Invalid';
+                function setupTabs() {
+                    const setActive = (isAlerts) => {
+                        if (isAlerts) {
+                            els.tabAlerts.classList.add('border-emerald-500', 'text-emerald-600');
+                            els.tabAlerts.classList.remove('border-transparent', 'text-slate-500');
+                            els.tabPrefs.classList.add('border-transparent', 'text-slate-500');
+                            els.tabPrefs.classList.remove('border-emerald-500', 'text-emerald-600');
+
+                            els.panelAlerts.classList.remove('hidden');
+                            els.panelPrefs.classList.add('hidden');
+                        } else {
+                            els.tabPrefs.classList.add('border-emerald-500', 'text-emerald-600');
+                            els.tabPrefs.classList.remove('border-transparent', 'text-slate-500');
+                            els.tabAlerts.classList.add('border-transparent', 'text-slate-500');
+                            els.tabAlerts.classList.remove('border-emerald-500', 'text-emerald-600');
+
+                            els.panelPrefs.classList.remove('hidden');
+                            els.panelAlerts.classList.add('hidden');
+                        }
+                    };
+
+                    els.tabAlerts.addEventListener('click', () => setActive(true));
+                    els.tabPrefs.addEventListener('click', () => setActive(false));
+
+                    // Check URL hash for default tab
+                    if (window.location.hash === '#preferences') {
+                        setActive(false);
                     }
                 }
 
-                const card = document.createElement('div');
-                card.className = "bg-slate-50 rounded-xl p-4 border border-slate-100 flex justify-between items-center hover:border-emerald-200 transition-colors group";
-                card.innerHTML = `
-                    <div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="font-bold text-lg text-slate-800">${sub.route.from}</span>
-                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                            </svg>
-                            <span class="font-bold text-lg text-slate-800">${sub.route.to}</span>
-                        </div>
-                        <div class="flex gap-3 text-xs font-medium text-slate-500 uppercase tracking-wide">
-                            <span class="bg-white px-2 py-1 rounded shadow-sm border border-slate-100">AM: ${amDisplay}</span>
-                            <span class="bg-white px-2 py-1 rounded shadow-sm border border-slate-100">PM: ${pmDisplay}</span>
-                        </div>
-                    </div>
-                    <button class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-50 group-hover:opacity-100" title="Delete Alert" onclick="deleteSub('${sub.id}')">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                // --- PREFERENCES ---
+                async function loadPreferences() {
+                    try {
+                        const res = await fetch('/api/user/preferences', { credentials: 'include' });
+                        if (!res.ok) throw new Error("Failed to load preferences");
+
+                        const s = await res.json();
+
+                        if (s.ticketPrice) els.prefPrice.value = s.ticketPrice;
+                        if (s.fromTimeOutbound) els.prefAmStart.value = s.fromTimeOutbound;
+                        if (s.toTimeOutbound) els.prefAmEnd.value = s.toTimeOutbound;
+                        if (s.fromTimeInbound) els.prefPmStart.value = s.fromTimeInbound;
+                        if (s.toTimeInbound) els.prefPmEnd.value = s.toTimeInbound;
+
+                        // Load stations
+                        if (s.homeStation) els.prefHomeStation.value = s.homeStation;
+                        if (s.homeStationCode) els.prefHomeStationCode.value = s.homeStationCode;
+                        if (s.workStation) els.prefWorkStation.value = s.workStation;
+                        if (s.workStationCode) els.prefWorkStationCode.value = s.workStationCode;
+
+                    } catch (e) {
+                        console.error("Error loading settings", e);
+                    }
+
+                    els.saveBtn.addEventListener('click', savePreferences);
+                }
+
+                async function savePreferences() {
+                    const s = {
+                        ticketPrice: els.prefPrice.value,
+                        fromTimeOutbound: els.prefAmStart.value,
+                        toTimeOutbound: els.prefAmEnd.value,
+                        fromTimeInbound: els.prefPmStart.value,
+                        toTimeInbound: els.prefPmEnd.value,
+                        homeStation: els.prefHomeStation.value,
+                        homeStationCode: els.prefHomeStationCode.value,
+                        workStation: els.prefWorkStation.value,
+                        workStationCode: els.prefWorkStationCode.value
+                    };
+
+                    try {
+                        const res = await fetch('/api/user/preferences', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(s),
+                            credentials: 'include'
+                        });
+
+                        if (!res.ok) {
+                            if (res.status === 401) {
+                                alert("Session expired. Please login again.");
+                                window.location.href = '/login?redirect=/manage';
+                                return;
+                            }
+                            const errData = await res.json().catch(() => ({}));
+                            throw new Error(errData.error || `Server Error (${res.status})`);
+                        }
+
+                        // Visual Feedback
+                        const originalText = els.saveBtn.innerHTML;
+                        els.saveBtn.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span>Saved!</span>`;
+                        els.saveBtn.classList.add('bg-emerald-700');
+
+                        setTimeout(() => {
+                            els.saveBtn.innerHTML = originalText;
+                            els.saveBtn.classList.remove('bg-emerald-700');
+                        }, 2000);
+
+                    } catch (e) {
+                        console.error("Error saving settings", e);
+                        alert("Failed to save preferences: " + e.message);
+                    }
+                }
+
+
+                // --- SUBSCRIPTIONS ---
+                async function loadSubscriptions() {
+                    els.loadingView.classList.remove('hidden');
+                    els.listView.classList.add('hidden');
+
+                    try {
+                        const res = await fetch(`/api/subscriptions?email=${encodeURIComponent(currentUser.email)}`, {
+                            credentials: 'include'
+                        });
+
+                        if (!res.ok) {
+                            if (res.status === 401) {
+                                window.location.href = '/login?redirect=/manage';
+                                return;
+                            }
+                            throw new Error("Failed to fetch subscriptions");
+                        }
+
+                        const subs = await res.json();
+                        renderList(subs);
+
+                        els.loadingView.classList.add('hidden');
+                        els.listView.classList.remove('hidden');
+
+                    } catch (e) {
+                        console.error('Error loading subscriptions:', e);
+                        els.loadingView.innerHTML = `<p class="text-red-600">Error loading subscriptions: ${e.message}</p><button onclick="location.reload()" class="mt-4 text-emerald-600 hover:text-emerald-700 font-bold">Retry</button>`;
+                    }
+                }
+
+                function renderList(subs) {
+                    els.container.innerHTML = '';
+                    if (subs.length === 0) {
+                        els.noSubs.classList.remove('hidden');
+                        return;
+                    }
+                    els.noSubs.classList.add('hidden');
+
+                    // Build a single HTML string for all items
+                    els.container.innerHTML = subs.map(sub => {
+                        // Handle both old and new data structures
+                        let amDisplay = '--:--';
+                        let pmDisplay = '--:--';
+
+                        if (sub.times) {
+                            if (sub.times.morning && sub.times.morning.start) {
+                                // New Structure
+                                amDisplay = `${sub.times.morning.start} - ${sub.times.morning.end}`;
+                                pmDisplay = `${sub.times.evening.start} - ${sub.times.evening.end}`;
+                            } else {
+                                // Fallback for old data
+                                amDisplay = sub.times.am || 'Invalid';
+                                pmDisplay = sub.times.pm || 'Invalid';
+                            }
+                        }
+
+                        return `
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 flex justify-between items-center hover:border-emerald-200 transition-colors group">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="font-bold text-lg text-slate-800">${sub.route.from}</span>
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                         </svg>
-                    </button>
-                `;
-                els.container.appendChild(card);
-            });
-        }
-
-        async function deleteSub(id) {
-            if (!confirm("Are you sure you want to stop tracking this route?")) return;
-
-            try {
-                const res = await fetch(`/api/subscription/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: currentUser.email }),
-                    credentials: 'include'
-                });
-
-                if (!res.ok) {
-                    if (res.status === 401) {
-                        window.location.href = '/login?redirect=/manage';
-                        return;
-                    }
-                    throw new Error("Delete failed");
+                        <span class="font-bold text-lg text-slate-800">${sub.route.to}</span>
+                    </div>
+                    <div class="flex gap-3 text-xs font-medium text-slate-500 uppercase tracking-wide">
+                        <span class="bg-white px-2 py-1 rounded shadow-sm border border-slate-100">AM: ${amDisplay}</span>
+                        <span class="bg-white px-2 py-1 rounded shadow-sm border border-slate-100">PM: ${pmDisplay}</span>
+                    </div>
+                </div>
+                <button class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-50 group-hover:opacity-100" title="Delete Alert" onclick="deleteSub('${sub.id}')">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </button>
+            </div>
+        `;
+                    }).join('');
                 }
 
-                // Reload list
-                await loadSubscriptions();
-            } catch (e) {
-                alert("Error deleting: " + e.message);
-            }
-        }
-    </script>
+                async function deleteSub(id) {
+                    if (!confirm("Are you sure you want to stop tracking this route?")) return;
+
+                    try {
+                        const res = await fetch(`/api/subscription/${id}`, {
+                            method: 'DELETE',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: currentUser.email }),
+                            credentials: 'include'
+                        });
+
+                        if (!res.ok) {
+                            if (res.status === 401) {
+                                window.location.href = '/login?redirect=/manage';
+                                return;
+                            }
+                            throw new Error("Delete failed");
+                        }
+
+                        // Reload list
+                        await loadSubscriptions();
+                    } catch (e) {
+                        alert("Error deleting: " + e.message);
+                    }
+                }
+            </script>
 </body>
 
 </html>
