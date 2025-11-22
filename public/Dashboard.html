@@ -890,7 +890,35 @@
         }
 
         // --- UPDATED loadSettings ---
-        function loadSettings() {
+        async function loadSettings() {
+            // Try to load from server first if user is authenticated
+            try {
+                const res = await fetch('/api/user/preferences', { credentials: 'include' });
+                if (res.ok) {
+                    const s = await res.json();
+                    console.log('✅ Loaded preferences from server:', s);
+
+                    if (s.ticketPrice) els.priceInput.value = s.ticketPrice;
+                    if (s.fromTimeOutbound) els.timeOutStart.value = s.fromTimeOutbound;
+                    if (s.toTimeOutbound) els.timeOutEnd.value = s.toTimeOutbound;
+                    if (s.fromTimeInbound) els.timeInStart.value = s.fromTimeInbound;
+                    if (s.toTimeInbound) els.timeInEnd.value = s.toTimeInbound;
+
+                    // Load default stations from server preferences
+                    if (s.homeStation) els.outFrom.value = s.homeStation;
+                    if (s.homeStationCode) els.outFromCode.value = s.homeStationCode;
+                    if (s.workStation) els.outTo.value = s.workStation;
+                    if (s.workStationCode) els.outToCode.value = s.workStationCode;
+
+                    // Sync the return journey (reverse the stations)
+                    syncReturnJourney();
+                    return; // Successfully loaded from server
+                }
+            } catch (e) {
+                console.warn('Could not load server preferences, falling back to localStorage:', e);
+            }
+
+            // Fallback to localStorage if server fetch failed or user not authenticated
             const stored = localStorage.getItem('railDelaySettings');
             if (stored) {
                 try {
@@ -1080,7 +1108,6 @@
                 const dayDate = new Date(d);
                 const dayIndex = dayDate.getDay();
                 if (isWeek && !officeDays.has(dayIndex)) continue;
-                if (!isWeek && (dayIndex === 0 || dayIndex === 6)) { showStatus("Weekend selected.", "error"); setLoading(false); return; }
                 for (const j of journeys) { metricRequests.push({ d, j }); }
             }
 
