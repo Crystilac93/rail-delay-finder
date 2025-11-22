@@ -2,6 +2,104 @@
 
 All notable changes to RefundMyRail will be documented in this file.
 
+## [0.1.6] - "Appleford" - 2025-11-22
+
+### ✨ Features
+- **Community Savings Goal Tracker**
+  - Added eye-catching "November Savings Challenge" section to landing page
+  - Interactive progress bar showing community goal progress (£6,700 of £10,000)
+  - Animated train emoji that moves along the progress bar
+  - Real-time statistics: completion percentage, amount remaining, claims found
+  - Community reward incentive: 5 days FREE Premium when goal is reached
+  - Premium design with gradient dark theme and pulsing background animations
+
+- **Social Proof Section**
+  - New "See What Our Customers Are Finding" showcase section
+  - Displays largest current month customer claim (£847.50 for November 2025)
+  - Detailed breakdown by delay severity (Major, Moderate, Minor delays)
+  - Premium gradient card design with animated glow effects on hover
+  - Compelling "Your Turn" call-to-action highlighting real customer success
+  - Responsive design with smooth animations
+
+### 🎨 UI/UX Improvements
+- **Landing Page Enhancements**
+  - Smooth gradient fade from emerald/teal to white between sections
+  - Reduced claim amount font size for better responsive behavior
+  - Professional visual hierarchy with layered animations
+  - Seamless section transitions without hard cutoffs
+
+- **User Settings Page Redesign**
+  - Complete visual overhaul to match Dashboard styling
+  - Preferences tab now default (instead of Alerts & Subscriptions)
+  - Preferences tab moved to left position for better UX
+  
+- **Settings Card Styling**
+  - Grouped settings into clean white cards with emerald icon badges
+  - Consistent rounded-2xl borders and subtle shadows throughout
+  - Icon-led sections: Ticket (🎫), Locations (📍), Time (🕐)
+  - Removed grey backgrounds from station inputs for cleaner look
+  - Proper spacing and alignment matching Dashboard design system
+
+- **Enhanced Time Selection**
+  - Integrated Flatpickr library for modern time picking
+  - Beautiful material green theme matching brand colors
+  - 15-minute increment selection for practical time choices
+  - Time-only picker (no calendar) with 24-hour format
+  - Consistent experience across all browsers (no native time input inconsistencies)
+  - Mobile-friendly with keyboard accessibility
+
+- **Number Formatting**
+  - Ticket price now displays with thousand separators (e.g., "7,437.92")
+  - Auto-formatting on page load from saved preferences
+  - Smart formatting: adds commas on blur, removes on focus for easy editing
+  - Always maintains 2 decimal places for currency precision
+  - Locale-aware formatting (en-GB) for UK currency standards
+
+### 🔧 Technical Improvements
+- **Frontend Dependencies**
+  - Added Flatpickr CSS and JS via CDN
+  - Material Green theme for consistent brand experience
+  - Lightweight integration with no build step required
+
+- **Form Enhancement**
+  - Changed time inputs from `type="time"` to `type="text"` for Flatpickr
+  - Added proper placeholder text ("Select time")
+  - Improved padding and spacing for better touch targets
+  - Enhanced focus states with emerald ring effects
+
+- **Code Organization**
+  - Centralized time picker initialization in `loadPreferences()`
+  - Separated formatting logic for price inputs
+  - Clean event handler attachment for better maintainability
+  - Consistent styling patterns across all preference cards
+
+### 📱 Responsive Design
+- **Mobile Optimizations**
+  - All new sections fully responsive on mobile devices
+  - Touch-friendly time picker interface
+  - Proper scaling of large claim amounts
+  - Grid layouts adapt from 2-column to single column on small screens
+
+### 🎯 User Experience
+- **Visual Consistency**
+  - User Settings page now matches Dashboard design language exactly
+  - Consistent use of emerald-600 primary color
+  - Unified card styling with rounded-2xl borders
+  - Matching focus states and transitions throughout
+
+- **Improved Workflow**
+  - Default to Preferences tab for quicker access to common settings
+  - Intuitive tab ordering (Preferences first, then Alerts)
+  - Clear visual feedback on all interactive elements
+  - Smooth animations and transitions for premium feel
+
+### 📝 Content Updates
+- **Marketing Copy**
+  - Compelling social proof with real-looking data
+  - Community-focused messaging for engagement
+  - Clear value proposition in savings tracker
+  - Professional, trustworthy tone throughout
+
 ## [0.1.5] - "Culham" - 2025-11-22
 
 ### ✨ Features
