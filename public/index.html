@@ -158,29 +158,56 @@
                     </div>
 
                     <form id="estimator-form" class="space-y-4">
-                        <div class="relative">
-                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Home
-                                Station</label>
-                            <input type="text" id="est-from" placeholder="e.g. Brighton"
-                                class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-bold text-slate-900"
-                                required autocomplete="off">
-                            <input type="hidden" id="est-from-code">
-                            <div id="results-est-from" class="autocomplete-results hidden"></div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="relative col-span-2 sm:col-span-1">
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Home
+                                    Station</label>
+                                <input type="text" id="est-from" placeholder="Station..."
+                                    class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-bold text-slate-900"
+                                    required autocomplete="off">
+                                <input type="hidden" id="est-from-code">
+                                <div id="results-est-from" class="autocomplete-results hidden"></div>
+                            </div>
+
+                            <div class="relative col-span-2 sm:col-span-1"> 
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Work
+                                    Station</label>
+                                <input type="text" id="est-to" placeholder="Station..."
+                                    class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-bold text-slate-900"
+                                    required autocomplete="off">
+                                <input type="hidden" id="est-to-code">
+                                <div id="results-est-to" class="autocomplete-results hidden"></div>
+                            </div>
                         </div>
 
-                        <div class="relative">
-                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Work
-                                Station</label>
-                            <input type="text" id="est-to" placeholder="e.g. London Victoria"
-                                class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-bold text-slate-900"
-                                required autocomplete="off">
-                            <input type="hidden" id="est-to-code">
-                            <div id="results-est-to" class="autocomplete-results hidden"></div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="relative">
+                                <label
+                                    class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Season
+                                    Ticket (£)</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">£</span>
+                                    <input type="text" id="est-cost" placeholder="" value=""
+                                        inputmode="decimal"
+                                        class="w-full pl-8 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-500 font-bold text-slate-900">
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <label
+                                    class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Days/Week</label>
+                                <select id="est-days"
+                                    class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-500 font-bold text-slate-900">
+                                    <option value="3">3 Days</option>
+                                    <option value="4">4 Days</option>
+                                    <option value="5" selected>5 Days</option>
+                                </select>
+                            </div>
                         </div>
 
                         <button type="submit" id="est-btn"
                             class="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-lg shadow-slate-200 transition-all transform active:scale-[0.98] flex items-center justify-center">
-                            <span>Estimate Refund</span>
+                            <span>Calculate Potential Refund</span>
                         </button>
                     </form>
 
@@ -216,19 +243,23 @@
         </div>
     </main>
 
-        <!-- Savings Goal Tracker -->
+    <!-- Savings Goal Tracker -->
     <section class="py-12 bg-white border-t border-slate-100">
         <div class="max-w-5xl mx-auto px-6 lg:px-8">
-            <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 sm:p-10 shadow-2xl border border-slate-700 relative overflow-hidden">
+            <div
+                class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 sm:p-10 shadow-2xl border border-slate-700 relative overflow-hidden">
                 <!-- Background pattern -->
                 <div class="absolute inset-0 opacity-10">
-                    <div class="absolute inset-0" style="background-image: repeating-linear-gradient(0deg, transparent, transparent 35px, rgba(255,255,255,0.1) 35px, rgba(255,255,255,0.1) 40px);"></div>
+                    <div class="absolute inset-0"
+                        style="background-image: repeating-linear-gradient(0deg, transparent, transparent 35px, rgba(255,255,255,0.1) 35px, rgba(255,255,255,0.1) 40px);">
+                    </div>
                 </div>
-                
+
                 <div class="relative z-10">
                     <!-- Header -->
                     <div class="text-center mb-8">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-3">
+                        <div
+                            class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-3">
                             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                             Community Goal
                         </div>
@@ -246,17 +277,19 @@
                             <!-- Track -->
                             <div class="h-4 bg-slate-700/50 rounded-full overflow-hidden border border-slate-600">
                                 <!-- Progress Fill -->
-                                <div class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-1000 ease-out" style="width: 67%;"></div>
+                                <div class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-1000 ease-out"
+                                    style="width: 67%;"></div>
                             </div>
-                            
+
                             <!-- Animated Train -->
-                            <div class="absolute top-1/2 -translate-y-1/2 transition-all duration-1000 ease-out" style="left: calc(67% - 20px);">
+                            <div class="absolute top-1/2 -translate-y-1/2 transition-all duration-1000 ease-out"
+                                style="left: calc(67% - 20px);">
                                 <div class="text-3xl animate-bounce" style="animation-duration: 2s;">
                                     🚂
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Progress Labels -->
                         <div class="flex justify-between items-center mt-3 text-xs sm:text-sm">
                             <span class="text-slate-400">£0</span>
@@ -266,13 +299,15 @@
                     </div>
 
                     <!-- Reward Banner -->
-                    <div class="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-4 sm:p-5 text-center border border-emerald-500/50 shadow-lg">
+                    <div
+                        class="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-4 sm:p-5 text-center border border-emerald-500/50 shadow-lg">
                         <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
                             <div class="text-4xl">🎁</div>
                             <div class="text-white">
                                 <p class="font-bold text-base sm:text-lg mb-1">Unlock Community Reward!</p>
                                 <p class="text-sm text-emerald-100">
-                                    When we hit £10,000: <strong class="text-white">Everyone gets 5 days FREE Premium</strong>
+                                    When we hit £10,000: <strong class="text-white">Everyone gets 5 days FREE
+                                        Premium</strong>
                                 </p>
                             </div>
                         </div>
@@ -691,52 +726,161 @@
             return st ? { lat: st.lat, long: st.long } : null;
         }
 
-        // Statistical Estimator
+        // --- Advanced Estimation Logic ---
+
+        // Heuristic: List of stations/routes known for higher disruption
+        // If either station matches, we bump the estimated failure rate
+        const HIGH_RISK_STATIONS = ['MAN', 'EUS', 'LIV', 'GLC', 'EDB', 'PRE', 'CAR']; // Manchester, Euston, Liverpool, Glasgow, Edinburgh, Preston, Carlisle
+        const MED_RISK_STATIONS = ['VIC', 'WAT', 'PAD', 'LBG', 'BTN', 'CBG']; // London Terminals, Brighton, Cambridge
+
+        // Haversine Formula for Distance (Miles)
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 3958.8; // Radius of Earth in miles
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        }
+
+        function getCoords(crsCode) {
+            let st = fullStationList.find(s => s.crsCode === crsCode);
+            if (!st) {
+                st = FALLBACK_GEOMETRY.find(s => s.crsCode === crsCode);
+            }
+            return st ? { lat: st.lat, long: st.long } : null;
+        }
+
+        function animateValue(obj, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const currentVal = progress * (end - start) + start;
+                obj.innerHTML = `£${currentVal.toFixed(2)}`;
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // --- Formatting Logic for Ticket Price ---
+        const estCostInput = document.getElementById('est-cost');
+
+        // Function to format number as currency string (e.g., 5,000.00)
+        const formatMoney = (val) => {
+            // Strip non-numeric chars except dot
+            const num = parseFloat(val.replace(/[^0-9.]/g, ''));
+            if (isNaN(num)) return '';
+            return num.toLocaleString('en-GB', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        };
+
+        // On Blur: Add formatting (e.g. turns "5000" into "5,000.00")
+        estCostInput.addEventListener('blur', (e) => {
+            e.target.value = formatMoney(e.target.value);
+        });
+
+        // On Focus: Remove formatting for easy editing (e.g. turns "5,000.00" into "5000.00")
+        estCostInput.addEventListener('focus', (e) => {
+            const val = e.target.value.replace(/[^0-9.]/g, '');
+            if (val) e.target.value = parseFloat(val).toFixed(2);
+        });
+
+        // --- Main Estimator Logic ---
         document.getElementById('estimator-form').addEventListener('submit', (e) => {
             e.preventDefault();
 
             const fromCode = document.getElementById('est-from-code').value;
             const toCode = document.getElementById('est-to-code').value;
 
+            // CLEAN THE INPUT: Remove commas before parsing
+            const rawCost = document.getElementById('est-cost').value.replace(/,/g, '');
+            const inputCost = parseFloat(rawCost) || 5000;
+
+            const daysPerWeek = parseInt(document.getElementById('est-days').value) || 5;
+
             if (!fromCode || !toCode) return;
+
+            // ... (Rest of the calculation logic remains exactly the same) ...
 
             const fromLoc = getCoords(fromCode);
             const toLoc = getCoords(toCode);
 
-            // Fallback if coords missing (unlikely with full list)
-            if (!fromLoc || !toLoc) {
-                document.getElementById('est-amount').textContent = "£120.00+";
-                document.getElementById('est-detail').textContent = "Estimated based on average commuter routes.";
-                document.getElementById('est-result').classList.remove('hidden');
-                return;
+            // Calculate Distance
+            let distance = 0;
+            if (fromLoc && toLoc) {
+                distance = getDistance(fromLoc.lat, fromLoc.long, toLoc.lat, toLoc.long);
             }
 
-            const distance = getDistance(fromLoc.lat, fromLoc.long, toLoc.lat, toLoc.long);
-            const roundedDist = Math.round(distance);
+            // 1. Calculate Base Failure Rate based on Distance
+            let failureRate = 0.02;
+            if (distance > 80) failureRate = 0.07;
+            else if (distance > 30) failureRate = 0.04;
 
-            // --- The Estimation "Algorithm" ---
-            const estTicketPrice = Math.max(1000, distance * 460 * 0.35); // Floor at £1000
-            const pricePerJourney = estTicketPrice / 460;
+            // 2. Apply Risk Heuristics
+            let riskMultiplier = 1.0;
+            if (HIGH_RISK_STATIONS.includes(fromCode) || HIGH_RISK_STATIONS.includes(toCode)) {
+                riskMultiplier = 1.5;
+            } else if (MED_RISK_STATIONS.includes(fromCode) || MED_RISK_STATIONS.includes(toCode)) {
+                riskMultiplier = 1.2;
+            }
 
-            let failRate = 0.02;
-            if (distance > 60) failRate = 0.06;
-            else if (distance > 20) failRate = 0.04;
+            failureRate = failureRate * riskMultiplier;
 
-            const annualFailures = Math.round(460 * failRate);
-            const majorIncidents = Math.ceil(annualFailures * 0.2);
-            const delayIncidents = annualFailures - majorIncidents;
+            // 3. Calculate Total Journeys
+            const annualJourneys = (52 * daysPerWeek * 2) - (28 * 2);
+            const pricePerJourney = inputCost / annualJourneys;
 
-            const totalRefund = (majorIncidents * (pricePerJourney * 0.5)) + (delayIncidents * (pricePerJourney * 0.25));
+            // 4. Estimate Incident Counts
+            const totalIncidents = Math.round(annualJourneys * failureRate);
+            const severeIncidents = Math.ceil(totalIncidents * 0.15);
+            const majorIncidents = Math.ceil(totalIncidents * 0.35);
+            const minorIncidents = totalIncidents - severeIncidents - majorIncidents;
 
-            // Display
-            document.getElementById('est-amount').textContent = `£${totalRefund.toFixed(2)}`;
-            document.getElementById('est-miles').textContent = roundedDist;
-            document.getElementById('est-delays').textContent = delayIncidents;
-            document.getElementById('est-cancels').textContent = majorIncidents;
+            // 5. Calculate Financial Total
+            const totalRefund = (severeIncidents * pricePerJourney) +
+                (majorIncidents * (pricePerJourney * 0.5)) +
+                (minorIncidents * (pricePerJourney * 0.25));
+
+            // Animation & UI Updates
+            const amountEl = document.getElementById('est-amount');
+            animateValue(amountEl, 0, totalRefund, 1000);
+
+            document.getElementById('est-miles').textContent = Math.round(distance);
+
+            // Update Breakdown Grid
+            const estContent = document.getElementById('est-content');
+            const gridHTML = `
+        <div class="grid grid-cols-3 gap-2 mb-6 text-xs font-medium text-slate-500">
+            <div class="bg-red-50 rounded-lg p-2 border border-red-100">
+                <span class="block text-red-600 font-bold text-lg">${severeIncidents}</span>
+                Severe
+            </div>
+            <div class="bg-orange-50 rounded-lg p-2 border border-orange-100">
+                <span class="block text-orange-600 font-bold text-lg">${majorIncidents}</span>
+                Major
+            </div>
+            <div class="bg-yellow-50 rounded-lg p-2 border border-yellow-100">
+                <span class="block text-yellow-600 font-bold text-lg">${minorIncidents}</span>
+                Minor
+            </div>
+        </div>
+    `;
+
+            const existingGrid = estContent.querySelector('.grid');
+            if (existingGrid) existingGrid.remove();
+
+            const moneyEl = document.getElementById('est-amount');
+            moneyEl.insertAdjacentHTML('afterend', gridHTML);
 
             document.getElementById('est-result').classList.remove('hidden');
 
-            // Scroll to result
             setTimeout(() => {
                 document.getElementById('est-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }, 100);
